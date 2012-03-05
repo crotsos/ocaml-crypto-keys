@@ -954,8 +954,7 @@ CAMLprim value ocaml_ssl_shutdown(value socket)
 #endif
 
 
-static int client_verify_callback(int ok, X509_STORE_CTX *ctx)
-{
+static int client_verify_callback(int ok, X509_STORE_CTX *ctx) {
   char *subject, *issuer;
   int depth, error;
   char *xs;
@@ -971,15 +970,13 @@ static int client_verify_callback(int ok, X509_STORE_CTX *ctx)
    * determine that then something is seriously wrong!
    */
   subject=(char*)ONELINE_NAME(X509_get_subject_name((X509*)xs));
-  if (subject == NULL)
-  {
+  if (subject == NULL) {
     ERR_print_errors_fp(stderr);
     ok = 0;
     goto return_time;
   }
   issuer = (char*)ONELINE_NAME(X509_get_issuer_name((X509*)xs));
-  if (issuer == NULL)
-  {
+  if (issuer == NULL) {
     ERR_print_errors_fp(stderr);
     ok = 0;
     goto return_time;
@@ -988,8 +985,7 @@ static int client_verify_callback(int ok, X509_STORE_CTX *ctx)
   /* If the user wants us to be chatty about things then this
    * is a good time to wizz the certificate chain past quickly :-)
    */
-  if (1)
-  {
+  if (1) {
     fprintf(stderr, "Certificate[%d] subject=%s\n", depth, subject);
     fprintf(stderr, "Certificate[%d] issuer =%s\n", depth, issuer);
     fflush(stderr);
@@ -999,10 +995,8 @@ static int client_verify_callback(int ok, X509_STORE_CTX *ctx)
    * we need to decide if that is good enough for us to
    * accept ...
    */
-  if (error == VERIFY_ERR_DEPTH_ZERO_SELF_SIGNED_CERT)
-  {
-    if (1)
-    {
+  if (error == VERIFY_ERR_DEPTH_ZERO_SELF_SIGNED_CERT) {
+    if (1) {
       /* Make 100% sure that in secure more we drop the
        * connection if the server does not have a
        * real certificate!
@@ -1015,40 +1009,30 @@ static int client_verify_callback(int ok, X509_STORE_CTX *ctx)
        */
       ok = 0;
       goto return_time;
-    }
-    else
-    {
+    } else {
       ok = 1;
       goto return_time;
     }
   }
 
   /* If we have any form of error in secure mode we reject the connection. */
-  if (!((error == VERIFY_OK) || (error == VERIFY_ROOT_OK)))
-  {
-    if (1)
-    {
+  if (!((error == VERIFY_OK) || (error == VERIFY_ROOT_OK))) {
+    if (1) {
       fprintf(stderr, "SSL: rejecting connection - error=%d\n", error);
-      if (error == VERIFY_ERR_UNABLE_TO_GET_ISSUER)
-      {
+      if (error == VERIFY_ERR_UNABLE_TO_GET_ISSUER) {
         fprintf(stderr, "unknown issuer: %s\n", issuer);
-      }
-      else
-      {
+      } else {
         ERR_print_errors_fp(stderr);
       }
       fflush(stderr);
       ok = 0;
       goto return_time;
-    }
-    else
-    {
+    } else {
       /* Be nice and display a lot more meaningful stuff
        * so that we know which issuer is unknown no matter
        * what the callers options are ...
        */
-      if (error == VERIFY_ERR_UNABLE_TO_GET_ISSUER)
-      {
+      if (error == VERIFY_ERR_UNABLE_TO_GET_ISSUER) {
         fprintf(stderr, "SSL: unknown issuer: %s\n", issuer);
         fflush(stderr);
       }
@@ -1106,6 +1090,51 @@ CAMLprim value ocaml_ssl_ext_rsa_read_privkey(value vfilename)
   return block;
 }
 
+CAMLprim value ocaml_ssl_ext_new_rsa_key(value vfilename) {
+  value block;
+  RSA *rsa = NULL;
+  caml_enter_blocking_section();
+  rsa = RSA_new();
+  if(rsa == NULL) {
+    caml_leave_blocking_section();
+    caml_raise_constant(*caml_named_value("ssl_ext_exn_rsa_error"));
+  }
+  caml_leave_blocking_section();
+
+  block = caml_alloc(sizeof(RSA*), 0);
+  RSA_val(block) = rsa;
+  return block;
+}
+CAMLprim value ocaml_ssl_ext_free_rsa_key(value key) {
+  CAMLparam1(key);
+  RSA *rsa = RSA_val(key);
+  RSA_free(rsa);
+  CAMLreturn(Val_unit);
+}
+
+CAMLprim value ocaml_ssl_ext_rsa_write_privkey(value vfilename, value key) {
+    CAMLparam2(vfilename, key);
+  RSA *rsa = RSA_val(key);
+  char *filename = String_val(vfilename);
+  FILE *fh = NULL;
+
+  if((fh = fopen(filename, "w")) == NULL) {
+    caml_raise_constant(*caml_named_value("ssl_ext_exn_rsa_error"));
+  }
+
+  caml_enter_blocking_section();
+  if((PEM_write_RSAPrivateKey(fh, rsa, NULL, NULL, 0, PEM_def_callback, NULL)) == NULL)
+  {
+    fclose(fh);
+    caml_leave_blocking_section();
+    caml_raise_constant(*caml_named_value("ssl_ext_exn_rsa_error"));
+  }
+  fclose(fh);
+  caml_leave_blocking_section();
+
+  CAMLreturn(Val_unit);
+}
+
 CAMLprim value ocaml_ssl_ext_rsa_read_pubkey(value vfilename)
 {
   value block;
@@ -1142,11 +1171,23 @@ CAMLprim value ocaml_ssl_ext_rsa_get_size(value key)
   CAMLreturn(Val_int(size));
 }
 
+
 CAMLprim value ocaml_ssl_ext_rsa_get_n(value key)
 {
   CAMLparam1(key);
   RSA *rsa = RSA_val(key);
   CAMLreturn(caml_copy_string(String_val(bn_to_hex(rsa->n))));
+}
+
+CAMLprim value ocaml_ssl_ext_rsa_set_n(value key, value val) {
+  CAMLparam2(key, val);
+  RSA *rsa = RSA_val(key);
+  char *hex_val = String_val(val);
+  value block;
+  caml_enter_blocking_section();
+  BN_hex2bn(&rsa->n, hex_val);
+  caml_leave_blocking_section();
+  CAMLreturn(Val_unit);
 }
 
 CAMLprim value ocaml_ssl_ext_rsa_get_e(value key)
@@ -1156,6 +1197,14 @@ CAMLprim value ocaml_ssl_ext_rsa_get_e(value key)
   CAMLreturn(caml_copy_string(String_val(bn_to_hex(rsa->e))));
 }
 
+CAMLprim value ocaml_ssl_ext_rsa_set_e(value key, value val) {
+  CAMLparam2(key, val);
+  RSA *rsa = RSA_val(key);
+  char *hex_val = String_val(val);
+  BN_hex2bn(&rsa->e, hex_val);
+  CAMLreturn(Val_unit);
+}
+
 CAMLprim value ocaml_ssl_ext_rsa_get_d(value key)
 {
   CAMLparam1(key);
@@ -1163,11 +1212,26 @@ CAMLprim value ocaml_ssl_ext_rsa_get_d(value key)
   CAMLreturn(caml_copy_string(String_val(bn_to_hex(rsa->d))));
 }
 
+CAMLprim value ocaml_ssl_ext_rsa_set_d(value key, value val) {
+  CAMLparam2(key, val);
+  RSA *rsa = RSA_val(key);
+  char *hex_val = String_val(val);
+  BN_hex2bn(&rsa->d, hex_val);
+  CAMLreturn(Val_unit);
+}
+
 CAMLprim value ocaml_ssl_ext_rsa_get_p(value key)
 {
   CAMLparam1(key);
   RSA *rsa = RSA_val(key);
   CAMLreturn(caml_copy_string(String_val(bn_to_hex(rsa->p))));
+}
+CAMLprim value ocaml_ssl_ext_rsa_set_p(value key, value val) {
+  CAMLparam2(key, val);
+  RSA *rsa = RSA_val(key);
+  char *hex_val = String_val(val);
+  BN_hex2bn(&rsa->p, hex_val);
+  CAMLreturn(Val_unit);
 }
 
 CAMLprim value ocaml_ssl_ext_rsa_get_q(value key)
@@ -1177,11 +1241,26 @@ CAMLprim value ocaml_ssl_ext_rsa_get_q(value key)
   CAMLreturn(caml_copy_string(String_val(bn_to_hex(rsa->q))));
 }
 
+CAMLprim value ocaml_ssl_ext_rsa_set_q(value key, value val) {
+  CAMLparam2(key, val);
+  RSA *rsa = RSA_val(key);
+  char *hex_val = String_val(val);
+  BN_hex2bn(&rsa->q, hex_val);
+  CAMLreturn(Val_unit);
+}
+
 CAMLprim value ocaml_ssl_ext_rsa_get_dp(value key)
 {
   CAMLparam1(key);
   RSA *rsa = RSA_val(key);
   CAMLreturn(caml_copy_string(String_val(bn_to_hex(rsa->dmp1))));
+}
+CAMLprim value ocaml_ssl_ext_rsa_set_dp(value key, value val) {
+  CAMLparam2(key, val);
+  RSA *rsa = RSA_val(key);
+  char *hex_val = String_val(val);
+  BN_hex2bn(&rsa->dmp1, hex_val);
+  CAMLreturn(Val_unit);
 }
 
 CAMLprim value ocaml_ssl_ext_rsa_get_dq(value key)
@@ -1190,11 +1269,25 @@ CAMLprim value ocaml_ssl_ext_rsa_get_dq(value key)
   RSA *rsa = RSA_val(key);
   CAMLreturn(caml_copy_string(String_val(bn_to_hex(rsa->dmq1))));
 }
+CAMLprim value ocaml_ssl_ext_rsa_set_dq(value key, value val) {
+  CAMLparam2(key, val);
+  RSA *rsa = RSA_val(key);
+  char *hex_val = String_val(val);
+  BN_hex2bn(&rsa->dmq1, hex_val);
+  CAMLreturn(Val_unit);
+}
 
 CAMLprim value ocaml_ssl_ext_rsa_get_qinv(value key)
 {
   CAMLparam1(key);
   RSA *rsa = RSA_val(key);
   CAMLreturn(caml_copy_string(String_val(bn_to_hex(rsa->iqmp))));
+}
+CAMLprim value ocaml_ssl_ext_rsa_set_qinv(value key, value val) {
+  CAMLparam2(key, val);
+  RSA *rsa = RSA_val(key);
+  char *hex_val = String_val(val);
+  BN_hex2bn(&rsa->iqmp, hex_val);
+  CAMLreturn(Val_unit);
 }
 

@@ -49,15 +49,16 @@ type key_conf = {
 }
 
 let load_key file typ = 
-    Printf.printf "loading key %s (%s)" file (string_of_key_type typ);
+    Printf.printf "loading key %s (%s)\n%!" file (string_of_key_type typ);
     match typ with 
     | PEM_PRIV -> 
-            let key = Rsa.read_rsa_privkey file in 
-            print_rsa_key key
+            let key = Rsa.read_rsa_privkey file in
+             Rsa.write_rsa_privkey "/tmp/hello.pem" key 
+(*             print_rsa_key key *)
 
 let convert_key conf =
     Printf.printf "converting key types...\n";
-    let key = load_key conf.in_key conf.in_type in 
+    let key = load_key conf.in_key conf.in_type in
     ()
 
 

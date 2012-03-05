@@ -14,15 +14,29 @@ type rsa_key
 external rsa_read_privkey : string -> rsa_key = "ocaml_ssl_ext_rsa_read_privkey"
 external rsa_read_pubkey : string -> rsa_key = "ocaml_ssl_ext_rsa_read_pubkey"
 
+external new_rsa_key : unit -> rsa_key = "ocaml_ssl_ext_new_rsa_key"
+external free_rsa_key : rsa_key -> unit = "ocaml_ssl_ext_new_rsa_key"
+(* external rsa_write_privkey : string -> rsa_key -> unit =
+    * "ocaml_ssl_ext_rsa_read_pubkey" *)
+external rsa_write_privkey : string -> rsa_key -> unit = "ocaml_ssl_ext_rsa_write_privkey"
+
 external rsa_get_size : rsa_key -> int = "ocaml_ssl_ext_rsa_get_size"
 external rsa_get_n : rsa_key -> string = "ocaml_ssl_ext_rsa_get_n"
+external rsa_set_n : rsa_key -> string -> unit = "ocaml_ssl_ext_rsa_set_n"
 external rsa_get_e : rsa_key -> string = "ocaml_ssl_ext_rsa_get_e"
+external rsa_set_e : rsa_key -> string -> unit = "ocaml_ssl_ext_rsa_set_e"
 external rsa_get_d : rsa_key -> string = "ocaml_ssl_ext_rsa_get_d"
+external rsa_set_d : rsa_key -> string -> unit = "ocaml_ssl_ext_rsa_set_d"
 external rsa_get_p : rsa_key -> string = "ocaml_ssl_ext_rsa_get_p"
+external rsa_set_p : rsa_key -> string -> unit = "ocaml_ssl_ext_rsa_set_p"
 external rsa_get_q : rsa_key -> string = "ocaml_ssl_ext_rsa_get_q"
+external rsa_set_q : rsa_key -> string -> unit = "ocaml_ssl_ext_rsa_set_q"
 external rsa_get_dp : rsa_key -> string = "ocaml_ssl_ext_rsa_get_dp"
+external rsa_set_dp : rsa_key -> string -> unit = "ocaml_ssl_ext_rsa_set_dp"
 external rsa_get_dq : rsa_key -> string = "ocaml_ssl_ext_rsa_get_dq"
+external rsa_set_dq : rsa_key -> string -> unit = "ocaml_ssl_ext_rsa_set_dq"
 external rsa_get_qinv : rsa_key -> string = "ocaml_ssl_ext_rsa_get_qinv"
+external rsa_set_qinv : rsa_key -> string -> unit = "ocaml_ssl_ext_rsa_set_qinv"
 
 (** valeur entière d'un chiffre hexa *)
 let char_of_hex_value c =
@@ -61,9 +75,16 @@ let string_of_hex s =
       )
   )
 
-let rsa_key_to_cryptokit_hex_rsa rsa_key = {
+let hex_of_string s = 
+    let ret = ref "" in 
+    String.iter (fun x -> ret := !ret ^ (Printf.sprintf "%02x" (Char.code x)) ) s;
+    !ret
+
+let rsa_key_to_cryptokit_hex_rsa rsa_key = 
+  {
   RSA.size = rsa_get_size(rsa_key) * 8; (* the result is in bytes whereas Cryptokit.RSA uses bits *)
   RSA.n = string_of_hex (rsa_get_n(rsa_key));
+
   RSA.e = string_of_hex (rsa_get_e(rsa_key));
   RSA.d = string_of_hex (rsa_get_d(rsa_key));
   RSA.p = string_of_hex (rsa_get_p(rsa_key));
@@ -71,7 +92,8 @@ let rsa_key_to_cryptokit_hex_rsa rsa_key = {
   RSA.dp = string_of_hex (rsa_get_dp(rsa_key));
   RSA.dq = string_of_hex (rsa_get_dq(rsa_key));
   RSA.qinv = string_of_hex (rsa_get_qinv(rsa_key));
-}
+    }  
+
 
 module C = Cryptokit
 
@@ -142,3 +164,27 @@ let read_rsa_pubkey file = try
   let rsa = rsa_read_pubkey file in
   rsa_key_to_cryptokit_hex_rsa rsa
 with RSA_error -> failwith "Read RSA public key failure"
+
+(* Read an RSA private key from a file.
+   If the file is password protected, a password will be asked in the console *)
+let write_rsa_privkey file rsa = try
+    Printf.printf "generating new rsa obj\n%!";
+    let rsa_key = new_rsa_key () in 
+(*     Printf.printf "new key size %d\n%!" (rsa_get_size rsa_key); *)
+    Printf.printf "setting n %s\n%!"  (hex_of_string rsa.RSA.n);
+    rsa_set_n rsa_key (hex_of_string rsa.RSA.n); 
+    rsa_set_e rsa_key (hex_of_string rsa.RSA.e);
+    rsa_set_d rsa_key (hex_of_string rsa.RSA.d);
+    rsa_set_p rsa_key (hex_of_string rsa.RSA.p);
+    rsa_set_q rsa_key (hex_of_string rsa.RSA.q);
+    rsa_set_dp rsa_key (hex_of_string rsa.RSA.dp);
+    rsa_set_dq rsa_key (hex_of_string rsa.RSA.dq);
+    rsa_set_qinv rsa_key (hex_of_string rsa.RSA.qinv);
+
+    Printf.printf "n:%s\n%!" (rsa_get_n(rsa_key));
+    Printf.printf "writting key\n%!";
+    rsa_write_privkey file rsa_key;
+    free_rsa_key rsa_key    
+with  RSA_error -> 
+     failwith "write RSA private key failure"
+

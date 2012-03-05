@@ -39,3 +39,4 @@ val print_rsa_key: Cryptokit.RSA.key -> unit
 val random_key: unit -> string
 val read_rsa_privkey : string -> Cryptokit.RSA.key
 val read_rsa_pubkey : string -> Cryptokit.RSA.key
+val write_rsa_privkey : string -> Cryptokit.RSA.key -> unit
