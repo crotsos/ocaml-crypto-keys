@@ -1,9 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 2c2fda92d328c4cfcc0a05dc4916c10c)
-# Executable crypto-convert
-"lib/convert.byte": pkg_getopt
-"lib/convert.byte": pkg_cryptokit
-<lib/*.ml{,i}>: pkg_getopt
+# DO NOT EDIT (digest: ce5fd0747ee8543e42903c5b01a2708e)
 # Library crypto_keys
 "lib": include
 <lib/*.ml{,i}>: oasis_library_crypto_keys_ccopt
@@ -14,6 +10,12 @@
 "lib/libcrypto_keys.a": oasis_library_crypto_keys_cclib
 "lib/dllcrypto_keys.so": oasis_library_crypto_keys_cclib
 <lib/crypto_keys.{cma,cmxa}>: use_libcrypto_keys
-<lib/*.ml{,i}>: pkg_cryptokit
 "lib/binding_ssl_ext.c": pkg_cryptokit
+# Executable crypto-convert
+"lib/convert.byte": use_crypto_keys
+"lib/convert.byte": pkg_getopt
+"lib/convert.byte": pkg_cryptokit
+<lib/*.ml{,i}>: use_crypto_keys
+<lib/*.ml{,i}>: pkg_getopt
+<lib/*.ml{,i}>: pkg_cryptokit
 # OASIS_STOP
