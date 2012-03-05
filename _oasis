@@ -20,5 +20,5 @@ Executable "crypto-convert"
   Path:       lib/
   BuildTools: ocamlbuild
   MainIs:     convert.ml
-  BuildDepends: getopt,cryptokit
+  BuildDepends: getopt,cryptokit,crypto_keys
   Install: false 
