@@ -1,6 +1,6 @@
 all: build
 
-NAME=openflow
+NAME=crypto_keys
 J=4
 
 export OCAMLRUNPARAM=b
