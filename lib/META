@@ -1,0 +1,10 @@
+# OASIS_START
+# DO NOT EDIT (digest: 89cf70223884c06bea8a3b5eb12612bb)
+version = "0.1"
+description = "A library to transform public key files between different formats"
+requires = "cryptokit"
+archive(byte) = "crypto_keys.cma"
+archive(native) = "crypto_keys.cmxa"
+exists_if = "crypto_keys.cma"
+# OASIS_STOP
+
