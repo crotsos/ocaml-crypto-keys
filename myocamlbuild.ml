@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 0a2a0ae39c1c19ad2e40d69d1804e06f) *)
+(* DO NOT EDIT (digest: 03ba2122fd1a692051dd738a0c35e6dd) *)
 module OASISGettext = struct
 # 21 "/opt/godi/build/apps/apps-oasis/work/oasis-0.2.0/src/oasis/OASISGettext.ml"
   
@@ -456,7 +456,11 @@ let package_default =
      flags =
        [
           (["oasis_library_crypto_keys_ccopt"; "compile"],
-            [(OASISExpr.EBool true, S [A "-ccopt"; A "-O2"])])
+            [(OASISExpr.EBool true, S [A "-ccopt"; A "-O2"])]);
+          (["oasis_library_crypto_keys_cclib"; "link"],
+            [(OASISExpr.EBool true, S [A "-cclib"; A "-lssl"])]);
+          (["oasis_library_crypto_keys_cclib"; "ocamlmklib"; "c"],
+            [(OASISExpr.EBool true, S [A "-lssl"])])
        ];
      }
   ;;

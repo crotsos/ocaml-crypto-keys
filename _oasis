@@ -13,11 +13,12 @@ Library crypto_keys
   Modules:    Key,Rsa
   CSources: binding_ssl_ext.c
   CCOpt:    -O2
+  CCLib:    -lssl
   BuildDepends: cryptokit
 
 Executable "crypto-convert"
   Path:       lib/
   BuildTools: ocamlbuild
   MainIs:     convert.ml
-  BuildDepends: getopt
+  BuildDepends: getopt,cryptokit
   Install: false 
