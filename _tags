@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: ce5fd0747ee8543e42903c5b01a2708e)
+# DO NOT EDIT (digest: ac125559f45ce38a320c99472b0120ef)
 # Library crypto_keys
 "lib": include
 <lib/*.ml{,i}>: oasis_library_crypto_keys_ccopt
@@ -10,12 +10,27 @@
 "lib/libcrypto_keys.a": oasis_library_crypto_keys_cclib
 "lib/dllcrypto_keys.so": oasis_library_crypto_keys_cclib
 <lib/crypto_keys.{cma,cmxa}>: use_libcrypto_keys
+"lib/binding_ssl_ext.c": pkg_lwt
+"lib/binding_ssl_ext.c": pkg_dns
 "lib/binding_ssl_ext.c": pkg_cryptokit
+"lib/binding_ssl_ext.c": pkg_bitstring.syntax
+"lib/binding_ssl_ext.c": pkg_bitstring
 # Executable crypto-convert
 "lib/convert.byte": use_crypto_keys
+"lib/convert.byte": pkg_lwt
 "lib/convert.byte": pkg_getopt
+"lib/convert.byte": pkg_dns
 "lib/convert.byte": pkg_cryptokit
+"lib/convert.byte": pkg_bitstring.syntax
+"lib/convert.byte": pkg_bitstring
 <lib/*.ml{,i}>: use_crypto_keys
+<lib/*.ml{,i}>: pkg_lwt
 <lib/*.ml{,i}>: pkg_getopt
+<lib/*.ml{,i}>: pkg_dns
 <lib/*.ml{,i}>: pkg_cryptokit
+<lib/*.ml{,i}>: pkg_bitstring.syntax
+<lib/*.ml{,i}>: pkg_bitstring
 # OASIS_STOP
+<lib/*>: syntax_camlp4o
+<lib/*>: bitstring.syntax
+<lib/*>: pkg_lwt.syntax

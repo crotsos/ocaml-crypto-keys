@@ -1,5 +1,5 @@
 (* Demonstration of the Getopt module *)
-
+open Key
 open Getopt
 
 
@@ -18,7 +18,7 @@ let specs =
         ('t', "in_type", None, Some (fun x -> conf.Key.in_type <- (Key.key_type_of_string
         (String.uppercase x))));
         ('a', "action", None, Some(fun x -> conf.Key.action <-
-            (Key.action_type_of_string (String.uppercase x))));
+            (Key.action_type_of_strng (String.uppercase x))));
         ( 's', "cert_subj", None, Some (fun x -> conf.Key.cert_subj <- x));
         ('K', "out_key", None, Some (fun x -> conf.Key.out_key <- x));
         ('T', "out_type", None, Some(fun x ->  conf.Key.out_type <-

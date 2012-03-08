@@ -14,11 +14,11 @@ Library crypto_keys
   CSources: binding_ssl_ext.c
   CCOpt:    -O2
   CCLib:    -lssl
-  BuildDepends: cryptokit
+  BuildDepends: cryptokit, lwt, dns, bitstring, bitstring.syntax
 
 Executable "crypto-convert"
   Path:       lib/
   BuildTools: ocamlbuild
   MainIs:     convert.ml
-  BuildDepends: getopt,cryptokit,crypto_keys
+  BuildDepends: getopt,cryptokit,crypto_keys,bitstring, bitstring.syntax
   Install: false 

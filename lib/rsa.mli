@@ -19,8 +19,10 @@
 open Cryptokit
 
 exception RSA_error
+exception EVP_error
 
 type rsa_key
+type evp_key
 
 (** Read an SSL RSA private key from a given file *)
 val rsa_read_privkey : string -> rsa_key
@@ -40,3 +42,4 @@ val random_key: unit -> string
 val read_rsa_privkey : string -> Cryptokit.RSA.key
 val read_rsa_pubkey : string -> Cryptokit.RSA.key
 val write_rsa_privkey : string -> Cryptokit.RSA.key -> unit
+val write_rsa_pubkey : string -> Cryptokit.RSA.key -> unit
