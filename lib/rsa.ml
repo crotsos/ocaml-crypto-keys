@@ -29,7 +29,8 @@ external evp_write_privkey : string -> rsa_key -> unit =
     "ocaml_ssl_ext_write_privkey"
 external evp_write_pubkey : string -> rsa_key -> unit =
   "ocaml_ssl_ext_write_pubkey"
-
+external sign_pub_key : rsa_key -> rsa_key -> string -> string =  
+    "ocaml_ssl_sign_pub_key"
 
 external rsa_get_size : rsa_key -> int = "ocaml_ssl_ext_rsa_get_size"
 external rsa_get_n : rsa_key -> string = "ocaml_ssl_ext_rsa_get_n"
@@ -125,6 +126,18 @@ let symetric direction key s =
 let symetric_encrypt = symetric C.Cipher.Encrypt
 let symetric_decrypt = symetric C.Cipher.Decrypt
 
+let new_rsa_key_for_RSA key = 
+    let ret = new_rsa_key () in 
+    rsa_set_n ret (hex_of_string rsa.RSA.n); 
+    rsa_set_e ret (hex_of_string rsa.RSA.e); 
+    rsa_set_d ret (hex_of_string rsa.RSA.d); 
+    rsa_set_p ret (hex_of_string rsa.RSA.p); 
+    rsa_set_q ret (hex_of_string rsa.RSA.q); 
+    rsa_set_dp ret (hex_of_string rsa.RSA.dp); 
+    rsa_set_dq ret (hex_of_string rsa.RSA.dq); 
+    rsa_set_qinv ret (hex_of_string rsa.RSA.qinv);
+    ret
+
 let new_rsa_empty_key () = {
   C.RSA.size = 0; C.RSA.n = "";
   C.RSA.e = ""; C.RSA.d = "";
@@ -194,4 +207,12 @@ let write_rsa_pubkey file rsa = try
   free_rsa_key rsa_key    
 with  RSA_error -> 
   failwith "write RSA public key failure"
+
+let sign_rsa_pub_key key sign_key issuer subject file = 
+    let rsa_key = new_rsa_key_from_RSA key in 
+    let rsa_sign_key = new_rsa_key_from_RSA key in 
+    try 
+        let value = sign_pub_key rsa_key rsa_sign_key issuer subject in 
+        Printf.printf "key : \n %s \n%!" value 
+    with RSA_error ->failwith "Cannot sign public key"
 
