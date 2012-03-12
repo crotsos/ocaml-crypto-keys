@@ -44,4 +44,4 @@ val read_rsa_pubkey : string -> Cryptokit.RSA.key
 val write_rsa_privkey : string -> Cryptokit.RSA.key -> unit
 val write_rsa_pubkey : string -> Cryptokit.RSA.key -> unit
 val sign_rsa_pub_key : Cryptokit.RSA.key -> Cryptokit.RSA.key -> string ->
-    string -> unit
+    string -> string -> unit

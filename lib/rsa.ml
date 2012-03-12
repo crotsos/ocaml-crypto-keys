@@ -29,7 +29,7 @@ external evp_write_privkey : string -> rsa_key -> unit =
     "ocaml_ssl_ext_write_privkey"
 external evp_write_pubkey : string -> rsa_key -> unit =
   "ocaml_ssl_ext_write_pubkey"
-external sign_pub_key : rsa_key -> rsa_key -> string -> string =  
+external sign_pub_key : rsa_key -> rsa_key -> string -> string -> string =  
     "ocaml_ssl_sign_pub_key"
 
 external rsa_get_size : rsa_key -> int = "ocaml_ssl_ext_rsa_get_size"
@@ -126,7 +126,7 @@ let symetric direction key s =
 let symetric_encrypt = symetric C.Cipher.Encrypt
 let symetric_decrypt = symetric C.Cipher.Decrypt
 
-let new_rsa_key_for_RSA key = 
+let new_rsa_key_from_RSA rsa = 
     let ret = new_rsa_key () in 
     rsa_set_n ret (hex_of_string rsa.RSA.n); 
     rsa_set_e ret (hex_of_string rsa.RSA.e); 
