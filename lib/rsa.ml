@@ -5,10 +5,12 @@ open Cryptokit
 
 exception RSA_error
 exception EVP_error
+exception CRT_error
 
 let _ =
   Callback.register_exception "ssl_ext_exn_rsa_error" RSA_error;
   Callback.register_exception "ssl_ext_exn_evp_error" EVP_error;
+  Callback.register_exception "ssl_ext_exn_certificate_error" CRT_error;
 
 
 type rsa_key
@@ -126,6 +128,19 @@ let symetric direction key s =
 let symetric_encrypt = symetric C.Cipher.Encrypt
 let symetric_decrypt = symetric C.Cipher.Decrypt
 
+let print_rsa_key rsa_key =
+  print_endline (Printf.sprintf " \n\
+let rsa_key = { \n RSA.size = %d; \n\
+RSA.n = \"%s\"; \n RSA.e = \"%s\"; \n\
+RSA.d = \"%s\"; \n RSA.p = \"%s\"; \n\
+RSA.q = \"%s\"; \n RSA.dp = \"%s\"; \n\
+RSA.dq = \"%s\"; \n RSA.qinv = \"%s\"; \n}" 
+rsa_key.C.RSA.size (to_hex rsa_key.C.RSA.n) 
+(to_hex rsa_key.C.RSA.e) (to_hex rsa_key.C.RSA.d)
+(to_hex rsa_key.C.RSA.p) (to_hex rsa_key.C.RSA.q) 
+(to_hex rsa_key.C.RSA.dp) (to_hex rsa_key.C.RSA.dq) 
+(to_hex rsa_key.C.RSA.qinv))
+
 let new_rsa_key_from_RSA rsa = 
     let ret = new_rsa_key () in 
     rsa_set_n ret (hex_of_string rsa.RSA.n); 
@@ -146,19 +161,6 @@ let new_rsa_empty_key () = {
   C.RSA.qinv = "";
 }
 
-let print_rsa_key rsa_key =
-  print_endline (Printf.sprintf " \n\
-let rsa_key = { \n RSA.size = %d; \n\
-RSA.n = \"%s\"; \n RSA.e = \"%s\"; \n\
-RSA.d = \"%s\"; \n RSA.p = \"%s\"; \n\
-RSA.q = \"%s\"; \n RSA.dp = \"%s\"; \n\
-RSA.dq = \"%s\"; \n RSA.qinv = \"%s\"; \n}" 
-rsa_key.C.RSA.size (to_hex rsa_key.C.RSA.n) 
-(to_hex rsa_key.C.RSA.e) (to_hex rsa_key.C.RSA.d)
-(to_hex rsa_key.C.RSA.p) (to_hex rsa_key.C.RSA.q) 
-(to_hex rsa_key.C.RSA.dp) (to_hex rsa_key.C.RSA.dq) 
-(to_hex rsa_key.C.RSA.qinv))
-
 let sign rsa_sig_privkey s =
   C.RSA.sign_CRT rsa_sig_privkey s
 
@@ -171,7 +173,7 @@ let random_key () =
   (* Read an RSA private key from a file.
   If the file is password protected, a password will be asked in the console *)
 let read_rsa_privkey file = try
-  let rsa = rsa_read_privkey file in
+    let rsa = rsa_read_privkey file in
   rsa_key_to_cryptokit_hex_rsa rsa
 with RSA_error -> failwith "Read RSA private key failure"
 
@@ -210,9 +212,13 @@ with  RSA_error ->
 
 let sign_rsa_pub_key key sign_key issuer subject file = 
     let rsa_key = new_rsa_key_from_RSA key in 
-    let rsa_sign_key = new_rsa_key_from_RSA key in 
+    let rsa_sign_key = new_rsa_key_from_RSA sign_key in 
     try 
         let value = sign_pub_key rsa_key rsa_sign_key issuer subject in 
-        Printf.printf "key : \n %s \n%!" value 
-    with RSA_error ->failwith "Cannot sign public key"
-
+        Printf.printf "key : \n %s \n%!" value; 
+        let output = open_out file in 
+            output_string output value;
+            flush output;
+            close_out output
+    with CRT_error ->
+        failwith "Cannot sign public key"

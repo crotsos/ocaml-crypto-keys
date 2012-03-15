@@ -1,3 +1,8 @@
+
+
+
+ ./convert.byte -k test_data/pub.pem -t PEM_PUB -p /auto/homes/cr409/scratch/code/ocaml-crypto-keys/test_data/priv.pem -a sign -K bob.crt -T PEM_CERT
+
 DNSSEC configuration:
 
 1) generate dnssec keys

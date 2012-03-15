@@ -153,10 +153,11 @@ let load_key file typ =
     Printf.printf "makeloading key %s (%s)\n%!" file (string_of_key_type typ);
     match typ with 
     | PEM_PRIV -> 
-            Some(Rsa.read_rsa_privkey file)
+            let key = Rsa.read_rsa_privkey file in 
+            Some(key)       
     | PEM_PUB -> 
             let key = Rsa.read_rsa_pubkey file in 
-            print_rsa_key key;
+(*             print_rsa_key key; *)
             Some(key)
     | DNS_PUB -> (get_dnssec_key file)
     | PEM_CERT -> None
@@ -183,18 +184,20 @@ let sign_key conf =
     Printf.printf "signing key...\n";
     let key = load_key conf.in_key conf.in_type in
     let sign_key = load_key conf.in_ca_priv PEM_PRIV in 
-    match key with 
-    | Some(key) ->
+(*     print_rsa_key sign_key; *)
+    match (key, sign_key) with 
+    | (Some(key), Some(sign_key)) ->
             begin
                 match conf.out_type with
                 | PEM_PRIV -> Rsa.write_rsa_privkey conf.out_key key
                 | PEM_PUB -> Rsa.write_rsa_pubkey conf.out_key key
                 | DNS_PRIV -> (Printf.eprintf "lib doesn't support DNS_PRIV key generation\n")
                 | DNS_PUB -> (Printf.eprintf "lib doesn't support DNS_PUB key generation\n")
-                | PEM_CERT ->  (Printf.eprintf "lib doesn't support PEM_CERT\n")
+                | PEM_CERT -> 
+                        Rsa.sign_rsa_pub_key key sign_key "" "" conf.out_key
                 | _ -> ()
             end
-                | None -> failwith "Failed to read input key"
+    | (_, _) -> failwith "Failed to read input key"
 
 let process conf = 
     Printf.printf "processing keys...\n%!";
