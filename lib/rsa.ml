@@ -31,7 +31,7 @@ external evp_write_privkey : string -> rsa_key -> unit =
     "ocaml_ssl_ext_write_privkey"
 external evp_write_pubkey : string -> rsa_key -> unit =
   "ocaml_ssl_ext_write_pubkey"
-external sign_pub_key : rsa_key -> rsa_key -> string -> string -> string =  
+external sign_pub_key : rsa_key -> rsa_key -> string -> string -> int -> string =  
     "ocaml_ssl_sign_pub_key"
 
 external rsa_get_size : rsa_key -> int = "ocaml_ssl_ext_rsa_get_size"
@@ -210,11 +210,11 @@ let write_rsa_pubkey file rsa = try
 with  RSA_error -> 
   failwith "write RSA public key failure"
 
-let sign_rsa_pub_key key sign_key issuer subject file = 
+let sign_rsa_pub_key key sign_key issuer subject duration file = 
     let rsa_key = new_rsa_key_from_RSA key in 
     let rsa_sign_key = new_rsa_key_from_RSA sign_key in 
     try 
-        let value = sign_pub_key rsa_key rsa_sign_key issuer subject in 
+        let value = sign_pub_key rsa_key rsa_sign_key issuer subject duration in 
         Printf.printf "key : \n %s \n%!" value; 
         let output = open_out file in 
             output_string output value;

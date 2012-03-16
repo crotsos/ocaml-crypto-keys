@@ -42,13 +42,16 @@ let action_type_of_strng = function
 
 type key_conf = {
     mutable in_key: string;
-    mutable in_ca_cert: string;
+(*     mutable in_ca_cert: string; *)
+    mutable in_issuer: string;
     mutable in_ca_priv: string;
     mutable in_type: key_type;
     mutable action : action_type;
     mutable cert_subj : string;
     mutable out_key : string;
     mutable out_type : key_type;
+(* for cert only. how long the certificate will last. *)
+    mutable duration : int;
 }
 
 let process_dnskey_rr = function
@@ -194,7 +197,8 @@ let sign_key conf =
                 | DNS_PRIV -> (Printf.eprintf "lib doesn't support DNS_PRIV key generation\n")
                 | DNS_PUB -> (Printf.eprintf "lib doesn't support DNS_PUB key generation\n")
                 | PEM_CERT -> 
-                        Rsa.sign_rsa_pub_key key sign_key "" "" conf.out_key
+                        Rsa.sign_rsa_pub_key key sign_key conf.in_issuer 
+                        conf.cert_subj conf.duration conf.out_key
                 | _ -> ()
             end
     | (_, _) -> failwith "Failed to read input key"

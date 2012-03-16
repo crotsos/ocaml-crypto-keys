@@ -4,16 +4,16 @@ open Getopt
 
 
 let conf = Key.({
-    in_key="test.pem";in_ca_cert="";in_ca_priv="";in_type=PEM_PUB;action=TRANSFORM;
-    cert_subj="";out_key="";out_type=PEM_PUB;
-})
+    in_key="test.pem";in_issuer="";in_ca_priv="";in_type=PEM_PUB;action=TRANSFORM;
+    cert_subj="";out_key="";out_type=PEM_PUB; duration=100;})
 
 let specs = 
     [
         (* (short_name * long_name * how_to_handle_flags *
          * how_to_handle_argument *)
         ('k', "in_key", None, Some (fun x -> conf.Key.in_key <- x));
-        ('c', "ca_cert", None, Some (fun x -> conf.Key.in_ca_cert <- x));
+(*         ('c', "ca_cert", None, Some (fun x -> conf.Key.in_ca_cert <- x)); *)
+        ('i', "issuer", None, Some (fun x -> conf.Key.in_issuer <- x));
         ('p', "ca_priv", None, Some (fun x -> conf.Key.in_ca_priv <- x));
         ('t', "in_type", None, Some (fun x -> conf.Key.in_type <- (Key.key_type_of_string
         (String.uppercase x))));
@@ -23,6 +23,8 @@ let specs =
         ('K', "out_key", None, Some (fun x -> conf.Key.out_key <- x));
         ('T', "out_type", None, Some(fun x ->  conf.Key.out_type <-
             (Key.key_type_of_string(String.uppercase x)) ) );
+            ('D', "duration", None, Some (fun x -> conf.Key.duration <-
+                (int_of_string x)));
 
 ]
 

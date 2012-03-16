@@ -88,126 +88,153 @@ static struct custom_operations cert_ops =
 };
 
 CAMLprim value ocaml_ssl_sign_pub_key(value pubKey, value privKey, 
-        value issuer, value subject) {
-  value block;
-  CAMLparam4(pubKey,privKey,issuer,subject);
- 
-  EVP_PKEY *pub = EVP_PKEY_new();
-  EVP_PKEY_set1_RSA(pub, RSA_val(pubKey));
-  
-  EVP_PKEY *priv = EVP_PKEY_new();
-  EVP_PKEY_set1_RSA(priv, RSA_val(privKey));
-  
-  char *str_issuer = String_val(issuer);
-  char *str_sub = String_val(subject);
-  X509 *cert = X509_new();
-  BIO* mem = NULL;
-  BUF_MEM *buf;
-  
-  caml_enter_blocking_section();
-  
-  if (!pub || !priv) {
-      caml_leave_blocking_section();
-      fprintf(stderr, "failed to allocate EVP_KEY strucures to store keys\n");
-      caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error")); 
-  }
+        value issuer, value subject, value delay) {
+    value block;
+    CAMLparam5(pubKey,privKey,issuer,subject, delay);
 
-  if (! cert) {
-      EVP_PKEY_free(pub);
-      EVP_PKEY_free(priv);
-      X509_free(cert);
-      caml_leave_blocking_section();
-      fprintf(stderr, "failed to create x509 struct\n");
-      caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error")); 
-  }
-  
-  if (! X509_set_version(cert, 2)){ 
-      EVP_PKEY_free(pub);
-      EVP_PKEY_free(priv);
-      X509_free(cert); 
-      caml_leave_blocking_section();
-      fprintf(stderr, "X509_set_version failed\n"); 
-      caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error"));
-  }
-  if (! X509_set_pubkey(cert, pub)){ 
-      X509_free(cert);
-      EVP_PKEY_free(priv);
-      caml_leave_blocking_section();
-      fprintf(stderr, "X509_set_pubkey failed\n"); 
-      caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error"));
-  }
+    EVP_PKEY *pub = EVP_PKEY_new();
+    EVP_PKEY_set1_RSA(pub, RSA_val(pubKey));
+    EVP_PKEY *priv = EVP_PKEY_new();
+    EVP_PKEY_set1_RSA(priv, RSA_val(privKey));
 
-  if (! ASN1_INTEGER_set(X509_get_serialNumber(cert), 1)) { 
-      X509_free(cert);
-      EVP_PKEY_free(priv);
-      EVP_PKEY_free(pub);
-      caml_leave_blocking_section();
-      fprintf(stderr, "ASN1_INTEGER_set failed\n");
-      caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error"));
-  }
-  if (! ASN1_TIME_set(X509_get_notBefore(cert), 0)) { 
-      X509_free(cert);
-      EVP_PKEY_free(priv);
-      EVP_PKEY_free(pub);
-      caml_leave_blocking_section();
-      fprintf(stderr, "ASN1_TIME_set failed for notBefore\n"); 
-      caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error"));
-  }
-  if (! ASN1_TIME_set(X509_get_notAfter(cert), 0)) { 
-      X509_free(cert);
-      EVP_PKEY_free(pub);
-      EVP_PKEY_free(priv);
-      caml_leave_blocking_section();
-      fprintf(stderr, "ASN1_TIME_set failed for notAfter\n"); 
-      caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error"));
-  }  
+    char *str_issuer = String_val(issuer);
+    char *str_sub = String_val(subject);
+    X509 *cert = X509_new();
+    BIO* mem = NULL;
+    BUF_MEM *buf;
+    time_t duration = Int_val(delay);
 
-  /* Parse the subject and issuer string. \; will sperate entries and = will sperate
-   * key values. 
-   * X509_NAME_add_entry_by_txt(self, key,
-   *        (SvUTF8(sv_val) ? MBSTRING_UTF8 : MBSTRING_ASC),
-   *        (unsigned char*) val, -1, -1, 0))*/
+    caml_enter_blocking_section();
 
-  if(!X509_sign(cert, priv, EVP_sha1()) ) {
-      X509_free(cert);
-      EVP_PKEY_free(priv);
-      EVP_PKEY_free(pub);
-      caml_leave_blocking_section();
-      fprintf(stderr, "Failed to sign the certificate\n");
-      caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error"));
-  }
+    if (!pub || !priv) {
+        caml_leave_blocking_section();
+        fprintf(stderr, "failed to allocate EVP_KEY strucures to store keys\n");
+        caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error")); 
+    }
 
-  EVP_PKEY_free(pub);
-  EVP_PKEY_free(priv);
+    if (! cert) {
+        EVP_PKEY_free(pub);
+        EVP_PKEY_free(priv);
+        X509_free(cert);
+        caml_leave_blocking_section();
+        fprintf(stderr, "failed to create x509 struct\n");
+        caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error")); 
+    }
 
-  mem = BIO_new(BIO_s_mem());
-  if (! mem) {
-      X509_free(cert);
-      caml_leave_blocking_section();
-      fprintf(stderr,"Cannot allocate BIO \n");
-      caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error"));
-  }
+    if (! X509_set_version(cert, 2)){ 
+        EVP_PKEY_free(pub);
+        EVP_PKEY_free(priv);
+        X509_free(cert); 
+        caml_leave_blocking_section();
+        fprintf(stderr, "X509_set_version failed\n"); 
+        caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error"));
+    }
+    if (! X509_set_pubkey(cert, pub)){ 
+        X509_free(cert);
+        EVP_PKEY_free(priv);
+        caml_leave_blocking_section();
+        fprintf(stderr, "X509_set_pubkey failed\n"); 
+        caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error"));
+    }
 
-  if (! (PEM_write_bio_X509(mem, cert) && (BIO_write(mem, "\0", 1) > 0)) ) {
-      X509_free(cert);
-      BIO_free(mem);
-      caml_leave_blocking_section();
-      fprintf(stderr,"X509_CRL_print failed \n");
-      caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error")); 
-  }
+    if (! ASN1_INTEGER_set(X509_get_serialNumber(cert), 1)) { 
+        X509_free(cert);
+        EVP_PKEY_free(priv);
+        EVP_PKEY_free(pub);
+        caml_leave_blocking_section();
+        fprintf(stderr, "ASN1_INTEGER_set failed\n");
+        caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error"));
+    }
+    if (! ASN1_TIME_set(X509_get_notBefore(cert), time(NULL))) { 
+        X509_free(cert);
+        EVP_PKEY_free(priv);
+        EVP_PKEY_free(pub);
+        caml_leave_blocking_section();
+        fprintf(stderr, "ASN1_TIME_set failed for notBefore\n"); 
+        caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error"));
+    }
+    if (! ASN1_TIME_set(X509_get_notAfter(cert), time(NULL) + duration)) {
+        X509_free(cert);
+        EVP_PKEY_free(pub);
+        EVP_PKEY_free(priv);
+        caml_leave_blocking_section();
+        fprintf(stderr, "ASN1_TIME_set failed for notAfter\n");
+        caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error"));
+    }
 
-  if( (! BIO_get_mem_ptr(mem, &buf)) || (buf == NULL)) {
-      X509_free(cert);
-      BIO_free(mem);
-      caml_leave_blocking_section();
-      fprintf(stderr,"BIO_get_mem_ptr failed\n" );
-      caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error")); 
-  }
-  
-  X509_free(cert);
-  caml_leave_blocking_section();
+    char *name = strtok(str_sub, ",");
+    char *val = NULL;
+    X509_NAME *x509_name = X509_NAME_new();
+    while (name != NULL) {
+        val = strchr(name, '=');
+        if (val != NULL) {
+            *val = '\0'; val++;
+            X509_NAME_add_entry_by_txt(x509_name, name, MBSTRING_ASC, val, -1, -1, 0);
+        }
+        name = strtok (NULL, ",");
+    }
+    X509_set_subject_name(cert, x509_name);
+    X509_NAME_free(x509_name);
 
-  CAMLreturn(caml_copy_string(buf->data));
+    x509_name = X509_NAME_new();
+    name = strtok(str_issuer, ",");
+    while (name != NULL) {
+        val = strchr(name, '=');
+        if (val != NULL) {
+            *val = '\0'; val++;
+            X509_NAME_add_entry_by_txt(x509_name, name, MBSTRING_ASC, val, -1, -1, 0);
+        }
+        name = strtok (NULL, ",");
+    }
+    X509_set_issuer_name(cert, x509_name);
+    X509_NAME_free(x509_name);
+
+    /* Parse the subject and issuer string. \; will sperate entries and = will sperate
+     * key values. 
+     * X509_NAME_add_entry_by_txt(self, key,
+     *        (SvUTF8(sv_val) ? MBSTRING_UTF8 : MBSTRING_ASC),
+     *        (unsigned char*) val, -1, -1, 0))*/
+
+    if(!X509_sign(cert, priv, EVP_sha1()) ) {
+        X509_free(cert);
+        EVP_PKEY_free(priv);
+        EVP_PKEY_free(pub);
+        caml_leave_blocking_section();
+        fprintf(stderr, "Failed to sign the certificate\n");
+        caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error"));
+    }
+
+    EVP_PKEY_free(pub);
+    EVP_PKEY_free(priv);
+
+    mem = BIO_new(BIO_s_mem());
+    if (! mem) {
+        X509_free(cert);
+        caml_leave_blocking_section();
+        fprintf(stderr,"Cannot allocate BIO \n");
+        caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error"));
+    }
+
+    if (! (PEM_write_bio_X509(mem, cert) && (BIO_write(mem, "\0", 1) > 0)) ) {
+        X509_free(cert);
+        BIO_free(mem);
+        caml_leave_blocking_section();
+        fprintf(stderr,"X509_CRL_print failed \n");
+        caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error")); 
+    }
+
+    if( (! BIO_get_mem_ptr(mem, &buf)) || (buf == NULL)) {
+        X509_free(cert);
+        BIO_free(mem);
+        caml_leave_blocking_section();
+        fprintf(stderr,"BIO_get_mem_ptr failed\n" );
+        caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error")); 
+    }
+
+    X509_free(cert);
+    caml_leave_blocking_section();
+
+    CAMLreturn(caml_copy_string(buf->data));
 }
 
 CAMLprim value ocaml_ssl_read_certificate(value vfilename)
