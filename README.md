@@ -37,13 +37,21 @@ functionality of the library.
 the name of the program is crypto-convert and provide the following option: 
 
 -k, --in_key: filename of the input file
+
 -i, --issuer: a comma separated issuer string (sign only)
+
 -s, --cert_subj: a comma separate string to describe the subject of the certificate. (sign only)
+
 -p, --ca_priv: the filename of the file to read the private key to sign a certification (sign only)
+
 -t, --in_type: the type of the input file: PEM_PUB, PEM_PRIV, PEM_CERT, DNS_PUB, DNS_PRIV
+
 -a, --action: the action performed over the key: SIGN, TRANSFORM, VERIFY
+
 -K, --out_key: filename to save the resulting key format.
+
 -T, --out_type: the key type of the output data. 
+
 -D, --duration: how long is the certificate valid for. (sign only)
 
 
@@ -55,10 +63,10 @@ crypto-convert -k Kalice.signpo.st.+007+31148.private \
  --i DNS_PRIV -a transform -T PEM_PRIV \
  -K alice.key
 
- - fetch the public key from the dnssec service and store it in pem format.
+- fetch the public key from the dnssec service and store it in pem format.
 crypto-convert -k bob.signpo.st -t DNS_PUB -a transform -T PEM_PUB -K bob.pub
 
- - sign a certificate for a public key fetch from DNSSEC: 
+- sign a certificate for a public key fetch from DNSSEC: 
 crypto-convert -k bob.signpo.st -p laptop.alice.key -t DNS_PUB -a sign \
     -T PEM_CERT -K laptop.alice-bob.crt -s "C=UK;O=signpost;CN=bob.signpo.st;"\
     -i  "C=UK;O=signpost;CN=laptop.alice.signpo.st;"
