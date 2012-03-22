@@ -1,6 +1,6 @@
 open Rsa
 open Lwt
-open Packet 
+open Dns.Packet 
 module C = Cryptokit
 
 exception Key_error of string
@@ -87,32 +87,35 @@ let get_dnssec_key domain =
   let ns_fd = (Unix.(socket PF_INET SOCK_DGRAM 0)) in
   let src = Unix.ADDR_INET(Unix.inet_addr_any, 25010) in
     Unix.bind ns_fd src;
-    let detail = Packet.({qr=(qr_of_bool false); opcode=(opcode_of_int 0);
-                          aa=true; tc=false; rd=true; ra=false; rcode=(rcode_of_int 0);})
+    let detail = Dns.Packet.({qr=(bool_to_qr false); opcode=(int_to_opcode 0);
+                          aa=true; tc=false; rd=true; ra=false; rcode=(int_to_rcode 0);})
     in
-    let question = Packet.({q_name=(Re_str.split (Re_str.regexp "\.") domain);
-                            q_type=(Packet.q_type_of_int 48);q_class=(Packet.q_class_of_int 0);}) in
-    let packet = Packet.({id=1;detail=(Packet.build_detail detail);
+    let question = Dns.Packet.({q_name=(Re_str.split (Re_str.regexp "\.") domain);
+                            q_type=(Dns.Packet.int_to_q_type 48);
+                            q_class=(Dns.Packet.int_to_q_class 255);}) in
+    let packet = Dns.Packet.({id=1;detail=(Dns.Packet.build_detail detail);
                           questions=[question]; answers=[]; authorities=[];
                           additionals=[];}) in
-    let data = Bitstring.string_of_bitstring (Packet.marshal packet) in
+    let data = Bitstring.string_of_bitstring (Dns.Packet.marshal_dns packet) in
 
     (*TODO: define ns as a param *)
-    let dst = Unix.ADDR_INET((Unix.inet_addr_of_string "8.8.8.8"),53) in
+    let dst = Unix.ADDR_INET((Unix.inet_addr_of_string "128.232.1.1"),53) in
     let _ = Unix.sendto ns_fd data 0 (String.length data) [] dst in
     let buf = (String.create 1500) in
     let (len, _) = Unix.recvfrom ns_fd buf 0 1500 [] in
+      Unix.close ns_fd;
     let lbl = Hashtbl.create 64 in
-    let reply = (Packet.parse_dns lbl
+    let reply = (Dns.Packet.parse_dns lbl
                    (Bitstring.bitstring_of_string (String.sub buf 0 len))) in
       (*     Printf.printf "dns reply: \n%s\n%!" (Packet.dns_to_string reply); *)
-      if ( List.length reply.Packet.answers == 0) then
+      if ( List.length reply.Dns.Packet.answers == 0) then
         None
       else
-        process_dnskey_rr ((List.hd reply.Packet.answers).rr_rdata)
+        process_dnskey_rr ((List.hd reply.Dns.Packet.answers).rr_rdata)
 
 let decode_value value = 
-  Base64.str_decode (Re_str.global_replace (Re_str.regexp "=") "" value)
+  C.transform_string (C.Base64.decode ()) 
+    (Re_str.global_replace (Re_str.regexp "=") "" value)
 
 let parse_dnssec_key file =
   let n = ref "" in
@@ -207,6 +210,35 @@ let ssh_pub_key_of_rsa key =
   in 
     "ssh-rsa " ^ key_ssh ^ ext_len ^ "\n"
 
+let ssh_fingerprint_of_rsa key = 
+  let e = 
+    if (( (int_of_char (key.C.RSA.e.[(String.length key.C.RSA.e ) - 1])) 
+        land 0x80) != 0) then 
+         "\x00" ^ key.C.RSA.e
+    else
+      key.C.RSA.e
+  in
+  let n =
+    if (( (int_of_char (key.C.RSA.n.[(String.length key.C.RSA.e ) - 1])) 
+    land 0x80) != 0) then
+         "\x00" ^ key.C.RSA.n
+    else
+      key.C.RSA.n
+  in
+  let key_bin = BITSTRING {
+     "\x00\x00\x00\x07\x73\x73\x68\x2D\x72\x73\x61":88:string;
+     (Int32.of_int (String.length e)):32; e:((String.length e)*8):string;
+     (Int32.of_int (String.length n)):32; n:((String.length n)*8):string } in 
+  let key_ssh = (C.transform_string (C.Base64.encode_compact()) 
+                (Bitstring.string_of_bitstring key_bin)) in 
+
+  let hash = Cryptokit.hash_string (Cryptokit.Hash.md5 ()) 
+               (Bitstring.string_of_bitstring key_bin) in
+  let fingerprint = ref "" in 
+    String.iter (fun ch -> 
+       fingerprint := (Printf.sprintf "%s:%0x" (!fingerprint) (int_of_char ch))) hash;
+    Printf.printf "fingerprint %s\n%!" (String.sub !fingerprint 1 ((String.length (!fingerprint)) - 1) ); 
+    (!fingerprint)
 
 let load_key file typ = 
   Printf.printf "makeloading key %s (%s)\n%!" file (string_of_key_type typ);
@@ -283,4 +315,10 @@ let ssh_pub_key_of_domain domain =
           Some([ret])
     | None -> None
 
+let ssh_fingerprint_of_domain domain = 
+  match (load_key domain DNS_PUB) with
+    | Some(key) -> 
+        let ret = ssh_fingerprint_of_rsa key in 
+          Some([ret])
+    | None -> None
 

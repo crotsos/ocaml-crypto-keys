@@ -33,3 +33,4 @@ type key_conf = {
 val process : key_conf -> unit
 
 val ssh_pub_key_of_domain : string -> string list option
+val ssh_fingerprint_of_domain: string -> string list option

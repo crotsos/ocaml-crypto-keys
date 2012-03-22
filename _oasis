@@ -1,8 +1,7 @@
 OASISFormat: 0.2
 Name:        ocaml-crypto-keys
 Version:     0.1
-Synopsis:    A library to transform public key files between different
-  formats 
+Synopsis:    A library to transform public key files between different formats 
 Authors:     Charalampos Rotsos <cr409@cl.cam.ac.uk>
 License:     GPL-2.0
 Plugins:     META (0.2)
