@@ -24,6 +24,9 @@ exception EVP_error
 type rsa_key
 type evp_key
 
+val string_of_hex : string -> string
+val hex_of_string : string -> string
+
 (** Read an SSL RSA private key from a given file *)
 val rsa_read_privkey : string -> rsa_key
 
@@ -45,3 +48,5 @@ val write_rsa_privkey : string -> Cryptokit.RSA.key -> unit
 val write_rsa_pubkey : string -> Cryptokit.RSA.key -> unit
 val sign_rsa_pub_key : Cryptokit.RSA.key -> Cryptokit.RSA.key -> string ->
     string -> int -> string -> unit
+
+val get_rsa_pubkey : Cryptokit.RSA.key -> string

@@ -33,6 +33,7 @@ external evp_write_pubkey : string -> rsa_key -> unit =
   "ocaml_ssl_ext_write_pubkey"
 external sign_pub_key : rsa_key -> rsa_key -> string -> string -> int -> string =  
     "ocaml_ssl_sign_pub_key"
+external string_of_rsa_pem_pub : rsa_key -> string = "ocaml_ssl_ext_rsa_get_pem_pubkey"
 
 external rsa_get_size : rsa_key -> int = "ocaml_ssl_ext_rsa_get_size"
 external rsa_get_n : rsa_key -> string = "ocaml_ssl_ext_rsa_get_n"
@@ -207,6 +208,16 @@ let write_rsa_pubkey file rsa = try
   rsa_set_e rsa_key (hex_of_string rsa.RSA.e);
   evp_write_pubkey file rsa_key;
   free_rsa_key rsa_key    
+with  RSA_error -> 
+  failwith "write RSA public key failure"
+
+let get_rsa_pubkey rsa = try
+  let rsa_key = new_rsa_key () in 
+  rsa_set_n rsa_key (hex_of_string rsa.RSA.n); 
+  rsa_set_e rsa_key (hex_of_string rsa.RSA.e);
+  let ret = string_of_rsa_pem_pub rsa_key in 
+  free_rsa_key rsa_key;
+  ret
 with  RSA_error -> 
   failwith "write RSA public key failure"
 

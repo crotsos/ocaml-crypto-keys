@@ -1,9 +1,7 @@
 # OASIS_START
 # DO NOT EDIT (digest: ffdf3b149b8a25dec4804a875dd889bb)
 version = "0.1"
-description
- =
- "A library to transform public key files between different\nformats"
+description = "A library to transform public key files between different\nformats"
 requires = "cryptokit lwt dns bitstring bitstring.syntax"
 archive(byte) = "crypto_keys.cma"
 archive(native) = "crypto_keys.cmxa"

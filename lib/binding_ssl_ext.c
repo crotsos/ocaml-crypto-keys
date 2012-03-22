@@ -463,6 +463,40 @@ CAMLprim value ocaml_ssl_ext_rsa_write_pubkey(value vfilename, value key) {
     CAMLreturn(Val_unit);
 }
 
+CAMLprim value ocaml_ssl_ext_rsa_get_pem_pubkey(value key) {
+    CAMLparam1(key);
+    RSA *rsa = RSA_val(key);
+    BIO* mem = NULL;
+    BUF_MEM *buf;
+
+    caml_leave_blocking_section();
+    mem = BIO_new(BIO_s_mem());
+    if (! mem) {
+        caml_leave_blocking_section();
+        fprintf(stderr,"Cannot allocate BIO \n");
+        caml_raise_constant(*caml_named_value("ssl_ext_exn_rsa_error"));
+    }
+
+    if (! (PEM_write_bio_RSAPublicKey(mem, rsa) && (BIO_write(mem, "\0", 1) > 0)) ) {
+    // if (! (PEM_write_bio_RSA_PUBKEY(mem, rsa) && (BIO_write(mem, "\0", 1) > 0)) ) {
+        BIO_free(mem);
+        caml_leave_blocking_section();
+        fprintf(stderr,"RSA_pub_write failed \n");
+        caml_raise_constant(*caml_named_value("ssl_ext_exn_rsa_error")); 
+    }
+
+    if( (! BIO_get_mem_ptr(mem, &buf)) || (buf == NULL)) {
+        BIO_free(mem);
+        caml_leave_blocking_section();
+        fprintf(stderr,"BIO_get_mem_ptr failed\n" );
+        caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error")); 
+    }
+
+    caml_leave_blocking_section();
+
+    CAMLreturn(caml_copy_string(buf->data));
+}
+
 /* CAMLprim value ocaml_ssl_ext_write_pubkey(value vfilename, value key) {
    CAMLparam2(vfilename, key);
    EVP_PKEY *evp_key = RSA_val(key);
