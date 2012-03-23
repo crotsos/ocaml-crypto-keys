@@ -1,6 +1,6 @@
 open Rsa
 open Lwt
-open Dns.Packet 
+open Packet 
 module C = Cryptokit
 
 exception Key_error of string
@@ -83,20 +83,51 @@ let process_dnskey_rr = function
       None
   | _ -> None
 
+let dns_pub_of_rsa key =
+  let len = String.length key.C.RSA.e in 
+
+  let key_rdata = 
+    if (len <= 255) then 
+      BITSTRING{len:8; (key.C.RSA.e):len*8:string; 
+      key.C.RSA.n:(String.length key.C.RSA.n)*8:string}
+    else 
+      BITSTRING{0:8; len:16; (key.C.RSA.e):len*8:string; 
+      key.C.RSA.n:(String.length key.C.RSA.n)*8:string}
+  in
+  Printf.sprintf "256 3 5 %s" (C.transform_string (C.Base64.encode_compact ()) 
+  (Bitstring.string_of_bitstring key_rdata))
+
+
+let dns_pub_of_rr key =
+  let len = String.length key.C.RSA.e in 
+
+  let key_rdata = 
+    if (len <= 255) then 
+      BITSTRING{len:8; (key.C.RSA.e):len*8:string; 
+      key.C.RSA.n:(String.length key.C.RSA.n)*8:string}
+    else 
+      BITSTRING{0:8; len:16; (key.C.RSA.e):len*8:string; 
+      key.C.RSA.n:(String.length key.C.RSA.n)*8:string}
+  in
+  Printf.sprintf "256 3 5 %s" (C.transform_string (C.Base64.encode_compact ()) 
+  (Bitstring.string_of_bitstring key_rdata))
+
+
 let get_dnssec_key domain =
   let ns_fd = (Unix.(socket PF_INET SOCK_DGRAM 0)) in
   let src = Unix.ADDR_INET(Unix.inet_addr_any, 25010) in
     Unix.bind ns_fd src;
-    let detail = Dns.Packet.({qr=(bool_to_qr false); opcode=(int_to_opcode 0);
+    let detail = Packet.({qr=(bool_to_qr false); opcode=(int_to_opcode 0);
                           aa=true; tc=false; rd=true; ra=false; rcode=(int_to_rcode 0);})
     in
-    let question = Dns.Packet.({q_name=(Re_str.split (Re_str.regexp "\.") domain);
-                            q_type=(Dns.Packet.int_to_q_type 48);
-                            q_class=(Dns.Packet.int_to_q_class 255);}) in
-    let packet = Dns.Packet.({id=1;detail=(Dns.Packet.build_detail detail);
+    let question = Packet.({q_name=(Re_str.split (Re_str.regexp "\.") domain);
+                            q_type=(Packet.int_to_q_type 48);
+                            q_class=(Packet.int_to_q_class 255);}) in
+
+    let packet = Packet.({id=1;detail=(Packet.build_detail detail);
                           questions=[question]; answers=[]; authorities=[];
                           additionals=[];}) in
-    let data = Bitstring.string_of_bitstring (Dns.Packet.marshal_dns packet) in
+    let data = Bitstring.string_of_bitstring (Packet.marshal_dns packet) in
 
     (*TODO: define ns as a param *)
     let dst = Unix.ADDR_INET((Unix.inet_addr_of_string "128.232.1.1"),53) in
@@ -105,13 +136,13 @@ let get_dnssec_key domain =
     let (len, _) = Unix.recvfrom ns_fd buf 0 1500 [] in
       Unix.close ns_fd;
     let lbl = Hashtbl.create 64 in
-    let reply = (Dns.Packet.parse_dns lbl
+    let reply = (Packet.parse_dns lbl
                    (Bitstring.bitstring_of_string (String.sub buf 0 len))) in
       (*     Printf.printf "dns reply: \n%s\n%!" (Packet.dns_to_string reply); *)
-      if ( List.length reply.Dns.Packet.answers == 0) then
+      if ( List.length reply.Packet.answers == 0) then
         None
       else
-        process_dnskey_rr ((List.hd reply.Dns.Packet.answers).rr_rdata)
+        process_dnskey_rr ((List.hd reply.Packet.answers).rr_rdata)
 
 let decode_value value = 
   C.transform_string (C.Base64.decode ()) 
@@ -264,22 +295,24 @@ let convert_key conf =
   Printf.printf "converting key types...\n";
   let key = load_key conf.in_key conf.in_type in
     match key with 
-      | Some(key) ->
-          begin
-            match conf.out_type with
-              | PEM_PRIV -> Rsa.write_rsa_privkey conf.out_key key
-              | PEM_PUB -> Rsa.write_rsa_pubkey conf.out_key key
-              | DNS_PRIV -> (Printf.eprintf "lib doesn't support DNS_PRIV key generation\n")
-              | DNS_PUB -> (Printf.eprintf "lib doesn't support DNS_PUB key generation\n")
-              | PEM_CERT ->  (Printf.eprintf "lib doesn't support PEM_CERT\n")
+    | Some(key) ->
+            begin
+                match conf.out_type with
+                | PEM_PRIV -> Rsa.write_rsa_privkey conf.out_key key
+                | PEM_PUB -> Rsa.write_rsa_pubkey conf.out_key key
+                | DNS_PRIV -> (Printf.eprintf "lib doesn't support DNS_PRIV key generation\n")
+                | DNS_PUB -> 
+                  let dns_rr = dns_pub_of_rsa key in 
+                  Printf.printf "Pub key is %s\n%!" dns_rr
+                | PEM_CERT ->  (Printf.eprintf "lib doesn't support PEM_CERT\n")
               | SSH_PUB -> 
                   let str = ssh_pub_key_of_rsa key in 
                     Printf.printf "%s\n%!" str;
                     let out_file = open_out conf.out_key in 
                       output_string out_file (str ^ "\n");
-                      close_out out_file
-          end
-      | None -> failwith "Failed to read input key"
+                      close_out out_file                | _ -> ()
+            end
+    | None -> failwith "Failed to read input key"
 
 let sign_key conf =
   Printf.printf "signing key...\n";
