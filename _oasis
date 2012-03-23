@@ -13,7 +13,7 @@ Library crypto_keys
   CSources: binding_ssl_ext.c
   CCOpt:    -O2
   CCLib:    -lssl -lcrypto
-  BuildDepends: cryptokit, lwt, dns, bitstring, bitstring.syntax
+  BuildDepends: cryptokit, lwt, dns, bitstring, bitstring.syntax, dns.resolver
 
 Executable "crypto-convert"
   Path:       lib/

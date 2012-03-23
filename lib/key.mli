@@ -30,7 +30,9 @@ type key_conf = {
     mutable duration : int;
 }
 
-val process : key_conf -> unit
+val process : key_conf -> unit Lwt.t
 
-val ssh_pub_key_of_domain : string -> string list option
-val ssh_fingerprint_of_domain: string -> string list option
+val ssh_pub_key_of_domain : string -> string list option Lwt.t
+val ssh_fingerprint_of_domain: string -> string list option Lwt.t
+val ssh_pub_key_of_domain : string -> string list option Lwt.t
+val dnskey_of_pem_pub_file : string -> string list option Lwt.t
