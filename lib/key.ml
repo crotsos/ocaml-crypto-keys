@@ -113,11 +113,12 @@ let dns_pub_of_rr key =
   (Bitstring.string_of_bitstring key_rdata))
 
 
-let get_dnssec_key domain =
+let get_dnssec_key ?server:(server="128.232.1.1") 
+      ?dns_port:(dns_port = 53) domain =
   try_lwt
   Printf.printf "No key found from dns\n%!";
-  lwt reply = Dns_resolver.resolve ~server:"128.232.1.1"
-  ~q_type:(Dns.Packet.int_to_q_type 48)  
+  lwt reply = Dns_resolver.resolve ~server:server
+  ~dns_port:dns_port ~q_type:(Dns.Packet.int_to_q_type 48)  
   (Dns.Name.string_to_domain_name domain) in 
   if ( List.length reply.Dns.Packet.answers == 0) then (
     Printf.printf "No key found from dns\n%!";
@@ -333,7 +334,8 @@ let ssh_fingerprint_of_rsa key =
     | SIGN -> sign_key conf
     | _ -> return (Printf.printf "Unsupported action %s" (string_of_action_type
     conf.action))
-  let dnskey_of_pem_pub_file file =
+
+let dnskey_of_pem_pub_file file =
     lwt tmp = load_key file PEM_PUB in
     match tmp with
     | Some(key) -> 
@@ -341,8 +343,9 @@ let ssh_fingerprint_of_rsa key =
       return (Some([ret]))
     | None -> return (None)
 
-  let ssh_pub_key_of_domain domain = 
-    lwt tmp = load_key domain DNS_PUB in 
+  let ssh_pub_key_of_domain  ?server:(server="128.232.1.1") 
+        ?port:(port = 53) domain = 
+    lwt tmp = get_dnssec_key ~server:server ~dns_port:port domain in 
     match (tmp) with
     | Some(key) -> 
       let ret = ssh_pub_key_of_rsa key in 
@@ -350,8 +353,9 @@ let ssh_fingerprint_of_rsa key =
       return(Some([ret]))
     | None -> return(None)
 
-  let ssh_fingerprint_of_domain domain = 
-    lwt tmp = load_key domain DNS_PUB in
+  let ssh_fingerprint_of_domain  ?server:(server="128.232.1.1") 
+        ?port:(port=53) domain = 
+    lwt tmp = get_dnssec_key ~server:server ~dns_port:port domain in
     match tmp with
     | Some(key) -> 
       let ret = ssh_fingerprint_of_rsa key in 
