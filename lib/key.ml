@@ -98,21 +98,6 @@ let dns_pub_of_rsa key =
   (Bitstring.string_of_bitstring key_rdata))
 
 
-let dns_pub_of_rr key =
-  let len = String.length key.C.RSA.e in 
-
-  let key_rdata = 
-    if (len <= 255) then 
-      BITSTRING{len:8; (key.C.RSA.e):len*8:string; 
-      key.C.RSA.n:(String.length key.C.RSA.n)*8:string}
-    else 
-      BITSTRING{0:8; len:16; (key.C.RSA.e):len*8:string; 
-      key.C.RSA.n:(String.length key.C.RSA.n)*8:string}
-  in
-  Printf.sprintf "DNSKEY 256 3 5 %s" (C.transform_string (C.Base64.encode_compact ()) 
-  (Bitstring.string_of_bitstring key_rdata))
-
-
 let get_dnssec_key ?server:(server="128.232.1.1") 
       ?dns_port:(dns_port = 53) domain =
   try_lwt
@@ -200,19 +185,29 @@ let load_ssh_pub_key file =
   C.RSA.qinv ="";})
 
 let ssh_pub_key_of_rsa key =
-  let e = 
-    if (( (int_of_char (key.C.RSA.e.[(String.length key.C.RSA.e ) - 1])) 
+    Printf.printf "0->%x %d->%x\n%!" (int_of_char key.C.RSA.e.[0])
+    ((String.length key.C.RSA.e ) - 1) 
+    (int_of_char (key.C.RSA.e.[(String.length key.C.RSA.e ) - 1]));
+
+    let e = 
+(*      if (( (int_of_char (key.C.RSA.e.[(String.length key.C.RSA.e ) - 1]))  *)
+     if (( (int_of_char (key.C.RSA.e.[0])) 
     land 0x80) != 0) then 
-      "\x00" ^ key.C.RSA.e
+      ("\x00"  ^ key.C.RSA.e)
   else
-    key.C.RSA.e
+(*       key.C.RSA.e ^"\x00"   *)
+      key.C.RSA.e   
   in
+    Printf.printf "0->%x %d->%x\n%!" (int_of_char key.C.RSA.n.[0])
+    ((String.length key.C.RSA.e ) - 1) 
+    (int_of_char (key.C.RSA.n.[(String.length key.C.RSA.n ) - 1]));
   let n =
-    if (( (int_of_char (key.C.RSA.n.[(String.length key.C.RSA.e ) - 1])) 
+(*     if (( (int_of_char (key.C.RSA.n.[(String.length key.C.RSA.n ) - 1]))  *)
+    if (( (int_of_char (key.C.RSA.n.[0])) 
     land 0x80) != 0) then
-      "\x00" ^ key.C.RSA.n
+      ("\x00" ^ key.C.RSA.n)
     else
-      key.C.RSA.n
+       key.C.RSA.n 
   in
   let key_bin = BITSTRING {
     "\x00\x00\x00\x07\x73\x73\x68\x2D\x72\x73\x61":88:string;
