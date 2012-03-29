@@ -298,6 +298,14 @@ let dnskey_of_pem_pub_file file =
           return (Some([ret]))
     | None -> return (None)
 
+let dnskey_of_pem_priv_file file =
+  lwt tmp = load_key file PEM_PRIV in
+  match tmp with
+    | Some(key) -> 
+        let ret = dns_pub_of_rsa key in 
+          return (Some([ret]))
+    | None -> return (None)
+
 let ssh_pub_key_of_domain  ?server:(server="128.232.1.1") 
       ?port:(port = 53) domain = 
   lwt tmp = get_dnssec_key ~server:server ~dns_port:port domain in 
