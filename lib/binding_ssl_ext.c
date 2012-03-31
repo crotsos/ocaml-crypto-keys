@@ -87,6 +87,27 @@ static struct custom_operations cert_ops =
   custom_deserialize_default
 };
 
+CAMLprim value ocaml_ssl_ext_gen_rsa (value len) {
+  value block;
+  CAMLparam1(len);
+  RSA *rsa = NULL;
+  int length = Int_val(len);
+
+  caml_enter_blocking_section();
+
+  rsa = RSA_generate_key (length, 65537l, NULL, NULL); 
+  if(!rsa) {
+    caml_leave_blocking_section();
+    caml_raise_constant(*caml_named_value("ssl_ext_exn_rsa_error"));
+  }
+
+  caml_leave_blocking_section();
+
+  block = caml_alloc(sizeof(RSA*), 0);
+  RSA_val(block) = rsa;
+  return block;
+}
+
 CAMLprim value ocaml_ssl_sign_pub_key(value pubKey, value privKey, 
         value issuer, value subject, value delay) {
     value block;
@@ -762,3 +783,5 @@ CAMLprim value ocaml_ssl_ext_write_pubkey(value vfilename, value key) {
     EVP_PKEY_free(pkey);
     CAMLreturn(Val_unit);
 }
+
+

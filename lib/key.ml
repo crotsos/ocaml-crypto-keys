@@ -324,3 +324,5 @@ let ssh_fingerprint_of_domain  ?server:(server="128.232.1.1")
           return(Some([ret]))
     | None -> return(None)
 
+let create_rsa_key file len = 
+  Rsa.create_rsa_key file len

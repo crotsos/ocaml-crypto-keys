@@ -22,7 +22,7 @@ external read_privkey : string -> evp_key = "ocaml_ssl_ext_read_privkey"
 
 
 external new_rsa_key : unit -> rsa_key = "ocaml_ssl_ext_new_rsa_key"
-external free_rsa_key : rsa_key -> unit = "ocaml_ssl_ext_new_rsa_key"
+external free_rsa_key : rsa_key -> unit = "ocaml_ssl_ext_free_rsa_key"
 external rsa_write_privkey : string -> rsa_key -> unit = 
   "ocaml_ssl_ext_rsa_write_privkey"
 external rsa_write_pubkey : string -> rsa_key -> unit =
@@ -52,6 +52,8 @@ external rsa_get_dq : rsa_key -> string = "ocaml_ssl_ext_rsa_get_dq"
 external rsa_set_dq : rsa_key -> string -> unit = "ocaml_ssl_ext_rsa_set_dq"
 external rsa_get_qinv : rsa_key -> string = "ocaml_ssl_ext_rsa_get_qinv"
 external rsa_set_qinv : rsa_key -> string -> unit = "ocaml_ssl_ext_rsa_set_qinv"
+
+external gen_rsa_key : int -> rsa_key = "ocaml_ssl_ext_gen_rsa"
 
 (** valeur entière d'un chiffre hexa *)
 let char_of_hex_value c =
@@ -233,3 +235,10 @@ let sign_rsa_pub_key key sign_key issuer subject duration file =
             close_out output
     with CRT_error ->
         failwith "Cannot sign public key"
+
+let create_rsa_key file len = 
+ let rsa = gen_rsa_key len in 
+ let ret = rsa_key_to_cryptokit_hex_rsa rsa in
+ let _ = write_rsa_privkey file ret in 
+  print_rsa_key ret; 
+  ret

@@ -1,4 +1,3 @@
-(* Demonstration of the Getopt module *)
 open Key
 open Getopt
 
