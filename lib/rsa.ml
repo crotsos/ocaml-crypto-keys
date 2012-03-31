@@ -223,18 +223,26 @@ let get_rsa_pubkey rsa = try
 with  RSA_error -> 
   failwith "write RSA public key failure"
 
-let sign_rsa_pub_key key sign_key issuer subject duration file = 
+let string_of_sign_rsa_pub_key key sign_key issuer subject duration file = 
     let rsa_key = new_rsa_key_from_RSA key in 
     let rsa_sign_key = new_rsa_key_from_RSA sign_key in 
     try 
-        let value = sign_pub_key rsa_key rsa_sign_key issuer subject duration in 
-        Printf.printf "key : \n %s \n%!" value; 
-        let output = open_out file in 
-            output_string output value;
-            flush output;
-            close_out output
+      let ret = sign_pub_key rsa_key rsa_sign_key issuer subject duration in 
+        Printf.printf "key : \n %s \n%!" ret; 
+        ret
     with CRT_error ->
         failwith "Cannot sign public key"
+
+let sign_rsa_pub_key key sign_key issuer subject duration file = 
+  try 
+    let value = string_of_sign_rsa_pub_key key sign_key issuer 
+      subject duration file in 
+    let output = open_out file in 
+    output_string output value;
+    flush output;
+    close_out output
+  with CRT_error ->
+    failwith "Cannot sign public key"
 
 let create_rsa_key file len = 
  let rsa = gen_rsa_key len in 

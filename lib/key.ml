@@ -248,7 +248,8 @@ let convert_key conf =
         match conf.out_type with
           | PEM_PRIV -> return(Rsa.write_rsa_privkey conf.out_key key)
           | PEM_PUB -> return(Rsa.write_rsa_pubkey conf.out_key key)
-          | DNS_PRIV -> return(Printf.eprintf "lib doesn't support DNS_PRIV key generation\n")
+          | DNS_PRIV -> 
+            return(Printf.eprintf "lib doesn't support DNS_PRIV key generation\n")
           | DNS_PUB -> 
               let str = dns_pub_of_rsa key in 
             let out_file = open_out conf.out_key in 
@@ -262,7 +263,7 @@ let convert_key conf =
               return (close_out out_file) 
           | _ -> return (Printf.eprintf "Invalid key type to read\n%!")
       end
-    | None -> failwith "Failed to read input key"
+    | None -> failwith "Failed to read input key" 
 
 let sign_key conf =
   Printf.printf "signing key...\n";
@@ -285,12 +286,42 @@ let sign_key conf =
         end
     | (_, _) -> failwith "Failed to read input key"
 
+let string_of_sign_key conf =
+  Printf.printf "signing key...\n";
+  lwt key = load_key  conf.ns_ip conf.ns_port conf.in_key conf.in_type in
+  lwt sign_key = load_key  conf.ns_ip conf.ns_port conf.in_ca_priv PEM_PRIV in 
+  (*     print_rsa_key sign_key; *)
+  match (key, sign_key) with 
+    | (Some(key), Some(sign_key)) ->
+        begin
+          match conf.out_type with
+(*            | PEM_PRIV -> return(Rsa.write_rsa_privkey conf.out_key key)
+            | PEM_PUB ->  return(Rsa.write_rsa_pubkey conf.out_key key)
+            | DNS_PRIV ->  return(Printf.eprintf 
+                                    "lib doesn't support DNS_PRIV key generation\n")
+            | DNS_PUB -> return(Printf.eprintf 
+                                  "lib doesn't support DNS_PUB key
+                                  generation\n")*)
+            | PEM_CERT -> 
+               return(Rsa.string_of_sign_rsa_pub_key key sign_key conf.in_issuer 
+                      conf.cert_subj conf.duration conf.out_key)
+            | _ -> 
+              failwith "Failed to sign key"
+        end
+    | (_, _) -> failwith "Failed to read input key"
+
 let process conf = 
   match conf.action with 
     | TRANSFORM -> convert_key conf
     | SIGN -> sign_key conf
     | _ -> return (Printf.printf "Unsupported action %s" (string_of_action_type
                                                             conf.action))
+let string_of_process conf = 
+  match conf.action with 
+    | TRANSFORM -> failwith "Unsupported action"
+    | SIGN -> string_of_sign_key conf
+    | _ -> failwith (Printf.sprintf "Unsupported action %s" 
+                        (string_of_action_type conf.action))
 
 let dnskey_of_pem_pub_file file =
   lwt tmp = load_key "" 0 file PEM_PUB in

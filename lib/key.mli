@@ -33,6 +33,7 @@ type key_conf = {
 }
 
 val process : key_conf -> unit Lwt.t
+val string_of_process : key_conf -> string Lwt.t
 
 val create_rsa_key : string -> int -> Cryptokit.RSA.key 
 
