@@ -4,7 +4,8 @@ open Getopt
 
 let conf = Key.({
     in_key="test.pem";in_issuer="";in_ca_priv="";in_type=PEM_PUB;action=TRANSFORM;
-    cert_subj="";out_key="";out_type=PEM_PUB; duration=100;})
+    cert_subj="";out_key="";out_type=PEM_PUB; duration=100;
+    ns_ip="172.16.11.1";ns_port=5354})
 
 let specs = 
     [

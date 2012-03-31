@@ -28,6 +28,8 @@ type key_conf = {
     mutable out_key : string;
     mutable out_type : key_type;
     mutable duration : int;
+    mutable ns_ip : string;
+    mutable ns_port : int;
 }
 
 val process : key_conf -> unit Lwt.t

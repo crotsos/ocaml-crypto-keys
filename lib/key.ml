@@ -54,6 +54,8 @@ type key_conf = {
   mutable out_type : key_type;
   (* for cert only. how long the certificate will last. *)
   mutable duration : int;
+  mutable ns_ip : string;
+  mutable ns_port : int;
 }
 
 let process_dnskey_rr = function
@@ -222,14 +224,14 @@ let ssh_fingerprint_of_rsa key =
      hash;
   (!fingerprint)
 
-let load_key file typ = 
+let load_key server port file typ = 
   Printf.printf "loading key %s (%s)\n%!" file (string_of_key_type typ);
   match typ with 
     | PEM_PRIV -> 
         return(Some(Rsa.read_rsa_privkey file))
     | PEM_PUB -> 
         return(Some(Rsa.read_rsa_pubkey file))
-    | DNS_PUB -> (get_dnssec_key file)
+    | DNS_PUB -> (get_dnssec_key ~server:server ~dns_port:port file)
     | PEM_CERT -> return(None)
     | DNS_PRIV -> return(Some(parse_dnssec_key file))
     | SSH_PUB -> return (Some(load_ssh_pub_key file))
@@ -239,7 +241,7 @@ let load_key file typ =
 
 let convert_key conf =
   Printf.printf "converting key types...\n";
-  lwt key = load_key conf.in_key conf.in_type in
+  lwt key = load_key conf.ns_ip conf.ns_port conf.in_key conf.in_type in
   match key with 
     | Some(key) ->
       begin
@@ -264,8 +266,8 @@ let convert_key conf =
 
 let sign_key conf =
   Printf.printf "signing key...\n";
-  lwt key = load_key conf.in_key conf.in_type in
-  lwt sign_key = load_key conf.in_ca_priv PEM_PRIV in 
+  lwt key = load_key  conf.ns_ip conf.ns_port conf.in_key conf.in_type in
+  lwt sign_key = load_key  conf.ns_ip conf.ns_port conf.in_ca_priv PEM_PRIV in 
   (*     print_rsa_key sign_key; *)
   match (key, sign_key) with 
     | (Some(key), Some(sign_key)) ->
@@ -291,7 +293,7 @@ let process conf =
                                                             conf.action))
 
 let dnskey_of_pem_pub_file file =
-  lwt tmp = load_key file PEM_PUB in
+  lwt tmp = load_key "" 0 file PEM_PUB in
   match tmp with
     | Some(key) -> 
         let ret = dns_pub_of_rsa key in 
@@ -299,7 +301,7 @@ let dnskey_of_pem_pub_file file =
     | None -> return (None)
 
 let dnskey_of_pem_priv_file file =
-  lwt tmp = load_key file PEM_PRIV in
+  lwt tmp = load_key "" 0 file PEM_PRIV in
   match tmp with
   | Some(key) -> 
     let ret = dns_pub_of_rsa key in 
