@@ -34,4 +34,4 @@ Executable "generate_key"
   BuildTools: ocamlbuild
   MainIs:     generate_key.ml 
   BuildDepends: crypto_keys
-  Install: false
+  Install: true

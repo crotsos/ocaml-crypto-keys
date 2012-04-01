@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 124f76e919d5bc0dadac16bfb3a645b0)
+# DO NOT EDIT (digest: 15865b82470c7e3bfc540b8fd72eb084)
 # Library crypto_keys
 "lib": include
 <lib/*.ml{,i}>: oasis_library_crypto_keys_ccopt
@@ -26,6 +26,14 @@
 "lib/convert.byte": pkg_bitstring.syntax
 "lib/convert.byte": pkg_bitstring
 <lib/*.ml{,i}>: pkg_getopt
+# Executable generate_key
+"lib/generate_key.byte": use_crypto_keys
+"lib/generate_key.byte": pkg_lwt
+"lib/generate_key.byte": pkg_dns.resolver
+"lib/generate_key.byte": pkg_dns
+"lib/generate_key.byte": pkg_cryptokit
+"lib/generate_key.byte": pkg_bitstring.syntax
+"lib/generate_key.byte": pkg_bitstring
 # Executable dnssec_to_ssh
 "lib/dnssec_to_ssh_test.byte": use_crypto_keys
 "lib/dnssec_to_ssh_test.byte": pkg_lwt
