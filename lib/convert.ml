@@ -1,6 +1,6 @@
 open Key
 open Getopt
-
+open Lwt
 
 let conf = Key.({
     in_key="test.pem";in_issuer="";in_ca_priv="";in_type=PEM_PUB;action=TRANSFORM;
@@ -28,7 +28,7 @@ let specs =
 
 ]
 
-let _ = 
+lwt _ = 
     parse_cmdline specs print_endline;
-    Key.process conf;
-    Printf.printf "Process in key %s\n%!" conf.Key.in_key
+    lwt _ = Key.process conf in 
+      return (Printf.printf "Process in key %s\n%!" conf.Key.in_key)
