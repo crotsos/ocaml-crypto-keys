@@ -113,6 +113,7 @@ CAMLprim value ocaml_ssl_sign_pub_key(value pubKey, value privKey,
     value block;
     CAMLparam5(pubKey,privKey,issuer,subject, delay);
 
+    printf("test0\n");
     EVP_PKEY *pub = EVP_PKEY_new();
     EVP_PKEY_set1_RSA(pub, RSA_val(pubKey));
     EVP_PKEY *priv = EVP_PKEY_new();
@@ -127,6 +128,7 @@ CAMLprim value ocaml_ssl_sign_pub_key(value pubKey, value privKey,
 
     caml_enter_blocking_section();
 
+    printf("test1\n");
     if (!pub || !priv) {
         caml_leave_blocking_section();
         fprintf(stderr, "failed to allocate EVP_KEY strucures to store keys\n");
@@ -142,6 +144,7 @@ CAMLprim value ocaml_ssl_sign_pub_key(value pubKey, value privKey,
         caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error")); 
     }
 
+    printf("test1\n");
     if (! X509_set_version(cert, 2)){ 
         EVP_PKEY_free(pub);
         EVP_PKEY_free(priv);
@@ -166,7 +169,9 @@ CAMLprim value ocaml_ssl_sign_pub_key(value pubKey, value privKey,
         fprintf(stderr, "ASN1_INTEGER_set failed\n");
         caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error"));
     }
-    if (! ASN1_TIME_set(X509_get_notBefore(cert), time(NULL))) { 
+    /* Make the certificate valid a day before in case we are in different timezones 
+     * or the clocks are out of synch */
+    if (! ASN1_TIME_set(X509_get_notBefore(cert), time(NULL) - 24*3600)) { 
         X509_free(cert);
         EVP_PKEY_free(priv);
         EVP_PKEY_free(pub);
@@ -210,6 +215,7 @@ CAMLprim value ocaml_ssl_sign_pub_key(value pubKey, value privKey,
     X509_set_issuer_name(cert, x509_name);
     X509_NAME_free(x509_name);
 
+    printf("test3\n");
     /* Parse the subject and issuer string. \; will sperate entries and = will sperate
      * key values. 
      * X509_NAME_add_entry_by_txt(self, key,
@@ -225,6 +231,7 @@ CAMLprim value ocaml_ssl_sign_pub_key(value pubKey, value privKey,
         caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error"));
     }
 
+    printf("test4\n");
     EVP_PKEY_free(pub);
     EVP_PKEY_free(priv);
 
@@ -252,6 +259,7 @@ CAMLprim value ocaml_ssl_sign_pub_key(value pubKey, value privKey,
         caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error")); 
     }
 
+    printf("test5\n");
     X509_free(cert);
     caml_leave_blocking_section();
 
@@ -728,11 +736,13 @@ CAMLprim value ocaml_ssl_ext_read_privkey(value vfilename) {
 // EVP_PKEY_DSA
 // EVP_PKEY_DH
 // EVP_PKEY_EC
+///ocaml_ssl_ext_rsa_write_privkey
 CAMLprim value ocaml_ssl_ext_write_privkey(value vfilename, value key) {
     CAMLparam2(vfilename, key);
     char *filename = String_val(vfilename);
     RSA *rsa = RSA_val(key);
     FILE *fh = NULL;
+
     // create an appropriate evp struct
     EVP_PKEY *pkey = EVP_PKEY_new();
     if(EVP_PKEY_set1_RSA(pkey, rsa) == 0 ) {
