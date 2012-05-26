@@ -228,7 +228,7 @@ let string_of_sign_rsa_pub_key key sign_key issuer subject duration file =
     let rsa_sign_key = new_rsa_key_from_RSA sign_key in 
     try 
       let ret = sign_pub_key rsa_key rsa_sign_key issuer subject duration in 
-        Printf.printf "key : \n %s \n%!" ret; 
+(*         Printf.printf "key : \n %s \n%!" ret;  *)
         ret
     with CRT_error ->
         failwith "Cannot sign public key"

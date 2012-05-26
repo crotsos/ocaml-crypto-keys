@@ -113,7 +113,6 @@ CAMLprim value ocaml_ssl_sign_pub_key(value pubKey, value privKey,
     value block;
     CAMLparam5(pubKey,privKey,issuer,subject, delay);
 
-    printf("test0\n");
     EVP_PKEY *pub = EVP_PKEY_new();
     EVP_PKEY_set1_RSA(pub, RSA_val(pubKey));
     EVP_PKEY *priv = EVP_PKEY_new();
@@ -128,7 +127,6 @@ CAMLprim value ocaml_ssl_sign_pub_key(value pubKey, value privKey,
 
     caml_enter_blocking_section();
 
-    printf("test1\n");
     if (!pub || !priv) {
         caml_leave_blocking_section();
         fprintf(stderr, "failed to allocate EVP_KEY strucures to store keys\n");
@@ -144,7 +142,6 @@ CAMLprim value ocaml_ssl_sign_pub_key(value pubKey, value privKey,
         caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error")); 
     }
 
-    printf("test1\n");
     if (! X509_set_version(cert, 2)){ 
         EVP_PKEY_free(pub);
         EVP_PKEY_free(priv);
@@ -215,7 +212,6 @@ CAMLprim value ocaml_ssl_sign_pub_key(value pubKey, value privKey,
     X509_set_issuer_name(cert, x509_name);
     X509_NAME_free(x509_name);
 
-    printf("test3\n");
     /* Parse the subject and issuer string. \; will sperate entries and = will sperate
      * key values. 
      * X509_NAME_add_entry_by_txt(self, key,
@@ -231,7 +227,6 @@ CAMLprim value ocaml_ssl_sign_pub_key(value pubKey, value privKey,
         caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error"));
     }
 
-    printf("test4\n");
     EVP_PKEY_free(pub);
     EVP_PKEY_free(priv);
 
@@ -259,7 +254,6 @@ CAMLprim value ocaml_ssl_sign_pub_key(value pubKey, value privKey,
         caml_raise_constant(*caml_named_value("ssl_ext_exn_certificate_error")); 
     }
 
-    printf("test5\n");
     X509_free(cert);
     caml_leave_blocking_section();
 

@@ -168,7 +168,7 @@ let load_ssh_pub_key file =
     close_in input;
     let key = (Cryptokit.(transform_string (Base64.decode ()) 
                             (List.nth (Re_str.split (Re_str.regexp " ") buf) 1))) in 
-      Printf.printf "readine key %s \n%!" (Rsa.hex_of_string key);
+(*       Printf.printf "readine key %s \n%!" (Rsa.hex_of_string key); *)
       let _ = 
         bitmatch (Bitstring.bitstring_of_string key) with 
           | { "\x00\x00\x00\x07\x73\x73\x68\x2D\x72\x73\x61":88:string;
@@ -176,7 +176,7 @@ let load_ssh_pub_key file =
                       nbytes:32; n:((Int32.to_int nbytes)*8):string; 
                                     _:-1:bitstring} -> 
               n_val := n; e_val := e;
-              Printf.printf "Matched the string";
+(*               Printf.printf "Matched the string"; *)
           | { _ } -> Printf.printf "Cannot decode key \n%!";
       in
         C.RSA.({C.RSA.size = 0; C.RSA.n =(!n_val); C.RSA.e =(!e_val); C.RSA.d ="";
@@ -225,7 +225,7 @@ let ssh_fingerprint_of_rsa key =
   (!fingerprint)
 
 let load_key server port file typ = 
-  Printf.printf "loading key %s (%s)\n%!" file (string_of_key_type typ);
+(*   Printf.printf "loading key %s (%s)\n%!" file (string_of_key_type typ); *)
   match typ with 
     | PEM_PRIV -> 
         return(Some(Rsa.read_rsa_privkey file))
@@ -236,11 +236,11 @@ let load_key server port file typ =
     | DNS_PRIV -> return(Some(parse_dnssec_key file))
     | SSH_PUB -> return (Some(load_ssh_pub_key file))
     | _ -> 
-        Printf.eprintf "Invalid key type to read\n%!"; 
+(*         Printf.eprintf "Invalid key type to read\n%!";  *)
         return(None)
 
 let convert_key conf =
-  Printf.printf "converting key types...\n";
+(*   Printf.printf "converting key types...\n"; *)
   lwt key = load_key conf.ns_ip conf.ns_port conf.in_key conf.in_type in
   match key with 
     | Some(key) ->
