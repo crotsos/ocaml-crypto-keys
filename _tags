@@ -1,54 +1,69 @@
 # OASIS_START
-# DO NOT EDIT (digest: 15865b82470c7e3bfc540b8fd72eb084)
+# DO NOT EDIT (digest: 2902ba86002b07a9943f1b75b3612bd6)
+# Ignore VCS directories, you can use the same kind of rule outside 
+# OASIS_START/STOP if you want to exclude directories that contains 
+# useless stuff for the build process
+<**/.svn>: -traverse
+<**/.svn>: not_hygienic
+".bzr": -traverse
+".bzr": not_hygienic
+".hg": -traverse
+".hg": not_hygienic
+".git": -traverse
+".git": not_hygienic
+"_darcs": -traverse
+"_darcs": not_hygienic
 # Library crypto_keys
-"lib": include
+"lib/crypto_keys.cmxs": use_crypto_keys
 <lib/*.ml{,i}>: oasis_library_crypto_keys_ccopt
 "lib/binding_ssl_ext.c": oasis_library_crypto_keys_ccopt
 <lib/crypto_keys.{cma,cmxa}>: oasis_library_crypto_keys_cclib
-"lib/libcrypto_keys.lib": oasis_library_crypto_keys_cclib
-"lib/dllcrypto_keys.dll": oasis_library_crypto_keys_cclib
-"lib/libcrypto_keys.a": oasis_library_crypto_keys_cclib
-"lib/dllcrypto_keys.so": oasis_library_crypto_keys_cclib
-<lib/crypto_keys.{cma,cmxa}>: use_libcrypto_keys
-"lib/binding_ssl_ext.c": pkg_lwt
-"lib/binding_ssl_ext.c": pkg_dns.resolver
-"lib/binding_ssl_ext.c": pkg_dns
+"lib/libcrypto_keys_stubs.lib": oasis_library_crypto_keys_cclib
+"lib/dllcrypto_keys_stubs.dll": oasis_library_crypto_keys_cclib
+"lib/libcrypto_keys_stubs.a": oasis_library_crypto_keys_cclib
+"lib/dllcrypto_keys_stubs.so": oasis_library_crypto_keys_cclib
+<lib/crypto_keys.{cma,cmxa}>: use_libcrypto_keys_stubs
 "lib/binding_ssl_ext.c": pkg_cryptokit
-"lib/binding_ssl_ext.c": pkg_bitstring.syntax
 "lib/binding_ssl_ext.c": pkg_bitstring
+"lib/binding_ssl_ext.c": pkg_bitstring.syntax
+"lib/binding_ssl_ext.c": pkg_lwt
+"lib/binding_ssl_ext.c": pkg_dns
+"lib/binding_ssl_ext.c": pkg_dns.resolver
 # Executable crypto-convert
 "lib/convert.byte": use_crypto_keys
-"lib/convert.byte": pkg_lwt
 "lib/convert.byte": pkg_getopt
-"lib/convert.byte": pkg_dns.resolver
-"lib/convert.byte": pkg_dns
 "lib/convert.byte": pkg_cryptokit
-"lib/convert.byte": pkg_bitstring.syntax
 "lib/convert.byte": pkg_bitstring
+"lib/convert.byte": pkg_bitstring.syntax
+"lib/convert.byte": pkg_cstruct
+"lib/convert.byte": pkg_lwt
+"lib/convert.byte": pkg_dns
+"lib/convert.byte": pkg_dns.resolver
 <lib/*.ml{,i}>: pkg_getopt
-# Executable generate_key
-"lib/generate_key.byte": use_crypto_keys
-"lib/generate_key.byte": pkg_lwt
-"lib/generate_key.byte": pkg_dns.resolver
-"lib/generate_key.byte": pkg_dns
-"lib/generate_key.byte": pkg_cryptokit
-"lib/generate_key.byte": pkg_bitstring.syntax
-"lib/generate_key.byte": pkg_bitstring
+<lib/*.ml{,i}>: pkg_cstruct
 # Executable dnssec_to_ssh
 "lib/dnssec_to_ssh_test.byte": use_crypto_keys
-"lib/dnssec_to_ssh_test.byte": pkg_lwt
-"lib/dnssec_to_ssh_test.byte": pkg_dns.resolver
-"lib/dnssec_to_ssh_test.byte": pkg_dns
 "lib/dnssec_to_ssh_test.byte": pkg_cryptokit
-"lib/dnssec_to_ssh_test.byte": pkg_bitstring.syntax
 "lib/dnssec_to_ssh_test.byte": pkg_bitstring
+"lib/dnssec_to_ssh_test.byte": pkg_bitstring.syntax
+"lib/dnssec_to_ssh_test.byte": pkg_lwt
+"lib/dnssec_to_ssh_test.byte": pkg_dns
+"lib/dnssec_to_ssh_test.byte": pkg_dns.resolver
+# Executable generate_key
+"lib/generate_key.byte": use_crypto_keys
+"lib/generate_key.byte": pkg_cryptokit
+"lib/generate_key.byte": pkg_bitstring
+"lib/generate_key.byte": pkg_bitstring.syntax
+"lib/generate_key.byte": pkg_lwt
+"lib/generate_key.byte": pkg_dns
+"lib/generate_key.byte": pkg_dns.resolver
 <lib/*.ml{,i}>: use_crypto_keys
-<lib/*.ml{,i}>: pkg_lwt
-<lib/*.ml{,i}>: pkg_dns.resolver
-<lib/*.ml{,i}>: pkg_dns
 <lib/*.ml{,i}>: pkg_cryptokit
-<lib/*.ml{,i}>: pkg_bitstring.syntax
 <lib/*.ml{,i}>: pkg_bitstring
+<lib/*.ml{,i}>: pkg_bitstring.syntax
+<lib/*.ml{,i}>: pkg_lwt
+<lib/*.ml{,i}>: pkg_dns
+<lib/*.ml{,i}>: pkg_dns.resolver
 # OASIS_STOP
 <lib/*>: syntax_camlp4o
 <lib/*>: bitstring.syntax

@@ -1,12 +1,13 @@
 # OASIS_START
-# DO NOT EDIT (digest: e797a3feea6c6f853bc711553dfedea0)
+# DO NOT EDIT (digest: 7f943a83d3070ac1aaa72f5648ac467e)
 version = "0.1"
-description
- =
- "A library to transform public key files between different formats"
+description =
+"A library to transform public key files between different formats"
 requires = "cryptokit lwt dns bitstring bitstring.syntax dns.resolver"
 archive(byte) = "crypto_keys.cma"
+archive(byte, plugin) = "crypto_keys.cma"
 archive(native) = "crypto_keys.cmxa"
+archive(native, plugin) = "crypto_keys.cmxs"
 exists_if = "crypto_keys.cma"
 # OASIS_STOP
 

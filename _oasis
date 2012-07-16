@@ -19,7 +19,7 @@ Executable "crypto-convert"
   Path:       lib/
   BuildTools: ocamlbuild
   MainIs:     convert.ml
-  BuildDepends: getopt,cryptokit,crypto_keys,bitstring, bitstring.syntax
+  BuildDepends: getopt,cryptokit,crypto_keys,bitstring, bitstring.syntax, cstruct
   Install: true
 
 Executable "dnssec_to_ssh"
