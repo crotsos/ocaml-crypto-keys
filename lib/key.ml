@@ -58,13 +58,10 @@ type key_conf = {
   mutable ns_port : int;
 }
 
-let process_dnskey_rr = function
-  (*| `DNSKEY(_, Dns.Packet.RSAMD5, bits) 
-   | `DNSKEY(_, Dns.Packet.RSASHA1, bits) 
-   | `DNSKEY(_, Dns.Packet.RSANSEC3, bits) 
-   | `DNSKEY(_, Dns.Packet.RSASHA256, bits)
-   | `DNSKEY(_, Dns.Packet.RSASHA512, bits) -> ( *)
-  | `DNSKEY(_, _, bits) -> (
+let process_dnskey_rr = 
+  let open Dns.Packet in
+  function
+  | DNSKEY(_, _, bits) -> (
       bitmatch (Bitstring.bitstring_of_string bits) with 
         | {0:8;len:16; exp:len*8:string; modu:-1:string} ->
             Some({C.RSA.size = 0; C.RSA.n = modu;
@@ -80,9 +77,6 @@ let process_dnskey_rr = function
                   C.RSA.qinv = "";})
         | { _ } -> Printf.printf "Invalid RSA DNSKEY format\n%!"; None
     )
-  | `DNSKEY(_, _, bits) ->
-      Printf.printf "We curently support only RSA cruptography\n%!";
-      None
   | _ -> None
 
 let dns_pub_of_rsa key =
@@ -100,17 +94,19 @@ let dns_pub_of_rsa key =
 
 
 let get_dnssec_key ?server:(server="128.232.1.1") ?dns_port:(dns_port = 53) domain =
-  try_lwt
+  try_lwt begin
     lwt reply = Dns_resolver.resolve ~server:server ~dns_port:dns_port 
-                  ~q_type:(Dns.Packet.int_to_q_type 48)  
-                  (Dns.Name.string_to_domain_name domain) in 
-    if ( List.length reply.Dns.Packet.answers == 0) then (
+                  ~q_type:(Dns.Packet.Q_DNSKEY)
+                  (Dns.Name.string_to_domain_name domain) in
+    let open Dns.Packet in
+    match reply.answers with
+    |[] ->
       Printf.printf "Failed to get \n%!";
       return None
-    ) else
-      return (
-        process_dnskey_rr 
-          ((List.hd reply.Dns.Packet.answers).Dns.Packet.rr_rdata))
+    |ans::_ ->
+      let r = process_dnskey_rr ans.rdata in
+      return r
+  end
   with e ->
     Printf.printf "failed to resolve name : %s\n%!" (Printexc.to_string e);
     return (None)
