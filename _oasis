@@ -19,6 +19,7 @@ Executable "crypto-convert"
   Path:       lib/
   BuildTools: ocamlbuild
   MainIs:     convert.ml
+  CompiledObject: best
   BuildDepends: getopt,cryptokit,crypto_keys,bitstring, bitstring.syntax, cstruct
   Install: true
 
@@ -27,6 +28,7 @@ Executable "dnssec_to_ssh"
   BuildTools: ocamlbuild
   MainIs:     dnssec_to_ssh_test.ml 
   BuildDepends: crypto_keys
+  CompiledObject: best
   Install: false 
   
 Executable "generate_key"
@@ -34,4 +36,5 @@ Executable "generate_key"
   BuildTools: ocamlbuild
   MainIs:     generate_key.ml 
   BuildDepends: crypto_keys
+  CompiledObject: best
   Install: true

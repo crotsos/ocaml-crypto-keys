@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 2902ba86002b07a9943f1b75b3612bd6)
+# DO NOT EDIT (digest: dedcd20976d7952589b53091488d45c4)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -30,33 +30,33 @@
 "lib/binding_ssl_ext.c": pkg_dns
 "lib/binding_ssl_ext.c": pkg_dns.resolver
 # Executable crypto-convert
-"lib/convert.byte": use_crypto_keys
-"lib/convert.byte": pkg_getopt
-"lib/convert.byte": pkg_cryptokit
-"lib/convert.byte": pkg_bitstring
-"lib/convert.byte": pkg_bitstring.syntax
-"lib/convert.byte": pkg_cstruct
-"lib/convert.byte": pkg_lwt
-"lib/convert.byte": pkg_dns
-"lib/convert.byte": pkg_dns.resolver
+<lib/convert.{native,byte}>: use_crypto_keys
+<lib/convert.{native,byte}>: pkg_getopt
+<lib/convert.{native,byte}>: pkg_cryptokit
+<lib/convert.{native,byte}>: pkg_bitstring
+<lib/convert.{native,byte}>: pkg_bitstring.syntax
+<lib/convert.{native,byte}>: pkg_cstruct
+<lib/convert.{native,byte}>: pkg_lwt
+<lib/convert.{native,byte}>: pkg_dns
+<lib/convert.{native,byte}>: pkg_dns.resolver
 <lib/*.ml{,i}>: pkg_getopt
 <lib/*.ml{,i}>: pkg_cstruct
 # Executable dnssec_to_ssh
-"lib/dnssec_to_ssh_test.byte": use_crypto_keys
-"lib/dnssec_to_ssh_test.byte": pkg_cryptokit
-"lib/dnssec_to_ssh_test.byte": pkg_bitstring
-"lib/dnssec_to_ssh_test.byte": pkg_bitstring.syntax
-"lib/dnssec_to_ssh_test.byte": pkg_lwt
-"lib/dnssec_to_ssh_test.byte": pkg_dns
-"lib/dnssec_to_ssh_test.byte": pkg_dns.resolver
+<lib/dnssec_to_ssh_test.{native,byte}>: use_crypto_keys
+<lib/dnssec_to_ssh_test.{native,byte}>: pkg_cryptokit
+<lib/dnssec_to_ssh_test.{native,byte}>: pkg_bitstring
+<lib/dnssec_to_ssh_test.{native,byte}>: pkg_bitstring.syntax
+<lib/dnssec_to_ssh_test.{native,byte}>: pkg_lwt
+<lib/dnssec_to_ssh_test.{native,byte}>: pkg_dns
+<lib/dnssec_to_ssh_test.{native,byte}>: pkg_dns.resolver
 # Executable generate_key
-"lib/generate_key.byte": use_crypto_keys
-"lib/generate_key.byte": pkg_cryptokit
-"lib/generate_key.byte": pkg_bitstring
-"lib/generate_key.byte": pkg_bitstring.syntax
-"lib/generate_key.byte": pkg_lwt
-"lib/generate_key.byte": pkg_dns
-"lib/generate_key.byte": pkg_dns.resolver
+<lib/generate_key.{native,byte}>: use_crypto_keys
+<lib/generate_key.{native,byte}>: pkg_cryptokit
+<lib/generate_key.{native,byte}>: pkg_bitstring
+<lib/generate_key.{native,byte}>: pkg_bitstring.syntax
+<lib/generate_key.{native,byte}>: pkg_lwt
+<lib/generate_key.{native,byte}>: pkg_dns
+<lib/generate_key.{native,byte}>: pkg_dns.resolver
 <lib/*.ml{,i}>: use_crypto_keys
 <lib/*.ml{,i}>: pkg_cryptokit
 <lib/*.ml{,i}>: pkg_bitstring
