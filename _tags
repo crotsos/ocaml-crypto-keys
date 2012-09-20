@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 5be9ba01701c685e504efd2cc1d023b3)
+# DO NOT EDIT (digest: e0e5bdda08f808fa68232c15ecf9ba7a)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -33,7 +33,6 @@
 # Executable crypto-convert
 <lib/convert.{native,byte}>: use_crypto_keys
 <lib/convert.{native,byte}>: pkg_cmdliner
-<lib/convert.{native,byte}>: pkg_getopt
 <lib/convert.{native,byte}>: pkg_cryptokit
 <lib/convert.{native,byte}>: pkg_bitstring
 <lib/convert.{native,byte}>: pkg_bitstring.syntax
@@ -41,7 +40,6 @@
 <lib/convert.{native,byte}>: pkg_lwt
 <lib/convert.{native,byte}>: pkg_dns
 <lib/convert.{native,byte}>: pkg_dns.resolver
-<lib/*.ml{,i}>: pkg_getopt
 <lib/*.ml{,i}>: pkg_cstruct
 # Executable dnssec_to_ssh
 <lib/dnssec_to_ssh.{native,byte}>: use_crypto_keys

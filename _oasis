@@ -3,7 +3,7 @@ Name:        ocaml-crypto-keys
 Version:     0.3.0
 Synopsis:    A library to transform public key files between different formats 
 Authors:     Charalampos Rotsos, Anil Madhavapeddy
-License:     GPL-2.0
+License:     ISC
 Plugins:     META (0.3)
 
 Library crypto_keys
@@ -20,7 +20,7 @@ Executable "crypto-convert"
   BuildTools: ocamlbuild
   MainIs:     convert.ml
   CompiledObject: best
-  BuildDepends: getopt,cryptokit,crypto_keys,bitstring, bitstring.syntax, cstruct, cmdliner
+  BuildDepends: cryptokit,crypto_keys,bitstring, bitstring.syntax, cstruct, cmdliner
   Install: true
 
 Executable "dnssec_to_ssh"
