@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: dedcd20976d7952589b53091488d45c4)
+# DO NOT EDIT (digest: ffcfbd6c2272fa5290d2fb042fac01f9)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -23,6 +23,7 @@
 "lib/libcrypto_keys_stubs.a": oasis_library_crypto_keys_cclib
 "lib/dllcrypto_keys_stubs.so": oasis_library_crypto_keys_cclib
 <lib/crypto_keys.{cma,cmxa}>: use_libcrypto_keys_stubs
+"lib/binding_ssl_ext.c": pkg_cmdliner
 "lib/binding_ssl_ext.c": pkg_cryptokit
 "lib/binding_ssl_ext.c": pkg_bitstring
 "lib/binding_ssl_ext.c": pkg_bitstring.syntax
@@ -31,6 +32,7 @@
 "lib/binding_ssl_ext.c": pkg_dns.resolver
 # Executable crypto-convert
 <lib/convert.{native,byte}>: use_crypto_keys
+<lib/convert.{native,byte}>: pkg_cmdliner
 <lib/convert.{native,byte}>: pkg_getopt
 <lib/convert.{native,byte}>: pkg_cryptokit
 <lib/convert.{native,byte}>: pkg_bitstring
@@ -43,6 +45,7 @@
 <lib/*.ml{,i}>: pkg_cstruct
 # Executable dnssec_to_ssh
 <lib/dnssec_to_ssh_test.{native,byte}>: use_crypto_keys
+<lib/dnssec_to_ssh_test.{native,byte}>: pkg_cmdliner
 <lib/dnssec_to_ssh_test.{native,byte}>: pkg_cryptokit
 <lib/dnssec_to_ssh_test.{native,byte}>: pkg_bitstring
 <lib/dnssec_to_ssh_test.{native,byte}>: pkg_bitstring.syntax
@@ -51,13 +54,24 @@
 <lib/dnssec_to_ssh_test.{native,byte}>: pkg_dns.resolver
 # Executable generate_key
 <lib/generate_key.{native,byte}>: use_crypto_keys
+<lib/generate_key.{native,byte}>: pkg_cmdliner
 <lib/generate_key.{native,byte}>: pkg_cryptokit
 <lib/generate_key.{native,byte}>: pkg_bitstring
 <lib/generate_key.{native,byte}>: pkg_bitstring.syntax
 <lib/generate_key.{native,byte}>: pkg_lwt
 <lib/generate_key.{native,byte}>: pkg_dns
 <lib/generate_key.{native,byte}>: pkg_dns.resolver
+# Executable cmds
+<lib/cmds.{native,byte}>: use_crypto_keys
+<lib/cmds.{native,byte}>: pkg_cmdliner
+<lib/cmds.{native,byte}>: pkg_cryptokit
+<lib/cmds.{native,byte}>: pkg_bitstring
+<lib/cmds.{native,byte}>: pkg_bitstring.syntax
+<lib/cmds.{native,byte}>: pkg_lwt
+<lib/cmds.{native,byte}>: pkg_dns
+<lib/cmds.{native,byte}>: pkg_dns.resolver
 <lib/*.ml{,i}>: use_crypto_keys
+<lib/*.ml{,i}>: pkg_cmdliner
 <lib/*.ml{,i}>: pkg_cryptokit
 <lib/*.ml{,i}>: pkg_bitstring
 <lib/*.ml{,i}>: pkg_bitstring.syntax
