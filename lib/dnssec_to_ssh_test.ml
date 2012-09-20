@@ -1,28 +1,43 @@
-(* Demonstration of the Getopt module *)
+(*
+ * Copyright (c) 2012 Charalampos Rotsos
+ * Copyright (c) 2012 Anil Madhavapeddy <anil@recoil.org>
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ *)
+
 open Key
 open Lwt
 
-let fetch_data server_ip server_port domain_name =
-  try 
-    lwt tmp = ssh_pub_key_of_domain  ~server:server_ip ~port:server_port domain_name in 
-    match tmp with
-        | Some(keys) ->
-          lwt _ = ssh_fingerprint_of_domain ~server:server_ip ~port:server_port domain_name in 
-           Printf.printf "keys for domain %s: %s\n%!" domain_name (List.hd keys);
-           return ()
-        | None ->
-            Printf.printf "No keys found for domain %s\n%!" domain_name;
-            return ()
+let lookup verbose server port domain_name =
+  let t = try_lwt
+    match_lwt ssh_pub_key_of_domain ~server ~port domain_name with
+    |Some keys ->
+      lwt _ = ssh_fingerprint_of_domain ~server ~port domain_name in
+      Printf.printf "%s:\n%s\n%!" domain_name (List.hd keys);
+      exit 0
+    |None ->
+      Printf.eprintf "No keys found for domain %s\n%!" domain_name;
+      exit 1
   with a -> 
     Printf.printf "bt:%s\n%s\nusage: ./%s domain_name\n%!" 
       (Printexc.get_backtrace ())
       (Printexc.to_string a) Sys.argv.(0) ;
       return ()
+  in
+  Lwt_main.run t
 
 open Cmdliner
-
-let lookup server port domain =
-  Lwt_main.run (fetch_data server port domain)
 
 let _ =
   let server = 
@@ -37,7 +52,11 @@ let _ =
     let doc = "Domain to query the SSH key for" in
     Arg.(value & pos 0 string "recoil.org" & info [] ~docv:"DOMAIN" ~doc)
   in
-  let cmd_t = Term.(pure lookup $ server $ port $ domain) in
+  let verbose = 
+    let doc = "Verbose debug output" in
+    Arg.(value & opt bool false & info ["v"; "verbose"] ~docv:"VERBOSE" ~doc)
+  in
+  let cmd_t = Term.(pure lookup $ verbose $ server $ port $ domain) in
   let info =
     let doc = "do a DS lookup in SSH pubkey format" in
     let man = [ `S "BUGS"; `P "Email bug reports to <cl-mirage@lists.cl.cam.ac.uk>."] in
