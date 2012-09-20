@@ -1,8 +1,8 @@
 OASISFormat: 0.3
 Name:        ocaml-crypto-keys
-Version:     0.1
+Version:     0.3.0
 Synopsis:    A library to transform public key files between different formats 
-Authors:     Charalampos Rotsos
+Authors:     Charalampos Rotsos, Anil Madhavapeddy
 License:     GPL-2.0
 Plugins:     META (0.3)
 
@@ -10,9 +10,9 @@ Library crypto_keys
   Path:       lib/
   BuildTools: ocamlbuild
   Modules:    Key,Rsa
-  CSources: binding_ssl_ext.c
-  CCOpt:    -O2
-  CCLib:    -lssl -lcrypto
+  CSources:   binding_ssl_ext.c
+  CCOpt:      -O2
+  CCLib:      -lssl -lcrypto
   BuildDepends: cryptokit, lwt, dns, bitstring, bitstring.syntax, dns.resolver, cmdliner
 
 Executable "crypto-convert"
@@ -26,7 +26,7 @@ Executable "crypto-convert"
 Executable "dnssec_to_ssh"
   Path:       lib/
   BuildTools: ocamlbuild
-  MainIs:     dnssec_to_ssh_test.ml 
+  MainIs:     dnssec_to_ssh.ml 
   BuildDepends: crypto_keys, cmdliner
   CompiledObject: best
   Install: false 

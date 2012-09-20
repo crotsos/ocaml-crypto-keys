@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: ffcfbd6c2272fa5290d2fb042fac01f9)
+# DO NOT EDIT (digest: 5be9ba01701c685e504efd2cc1d023b3)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -44,14 +44,14 @@
 <lib/*.ml{,i}>: pkg_getopt
 <lib/*.ml{,i}>: pkg_cstruct
 # Executable dnssec_to_ssh
-<lib/dnssec_to_ssh_test.{native,byte}>: use_crypto_keys
-<lib/dnssec_to_ssh_test.{native,byte}>: pkg_cmdliner
-<lib/dnssec_to_ssh_test.{native,byte}>: pkg_cryptokit
-<lib/dnssec_to_ssh_test.{native,byte}>: pkg_bitstring
-<lib/dnssec_to_ssh_test.{native,byte}>: pkg_bitstring.syntax
-<lib/dnssec_to_ssh_test.{native,byte}>: pkg_lwt
-<lib/dnssec_to_ssh_test.{native,byte}>: pkg_dns
-<lib/dnssec_to_ssh_test.{native,byte}>: pkg_dns.resolver
+<lib/dnssec_to_ssh.{native,byte}>: use_crypto_keys
+<lib/dnssec_to_ssh.{native,byte}>: pkg_cmdliner
+<lib/dnssec_to_ssh.{native,byte}>: pkg_cryptokit
+<lib/dnssec_to_ssh.{native,byte}>: pkg_bitstring
+<lib/dnssec_to_ssh.{native,byte}>: pkg_bitstring.syntax
+<lib/dnssec_to_ssh.{native,byte}>: pkg_lwt
+<lib/dnssec_to_ssh.{native,byte}>: pkg_dns
+<lib/dnssec_to_ssh.{native,byte}>: pkg_dns.resolver
 # Executable generate_key
 <lib/generate_key.{native,byte}>: use_crypto_keys
 <lib/generate_key.{native,byte}>: pkg_cmdliner

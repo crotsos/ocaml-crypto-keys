@@ -1,6 +1,6 @@
 # OASIS_START
-# DO NOT EDIT (digest: 717d9a0c7948b267e01e1f53e7eb9eb8)
-version = "0.1"
+# DO NOT EDIT (digest: d0c3b8a08bdb546cbc35a7913b626e8a)
+version = "0.3.0"
 description =
 "A library to transform public key files between different formats"
 requires =
