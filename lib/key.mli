@@ -9,6 +9,7 @@ type key_type =
     | SSH_PUB
 val string_of_key_type : key_type -> string
 val key_type_of_string : string -> key_type
+val keys : (string * key_type) list
 
 exception Action_error of string
 type action_type = 
@@ -17,6 +18,7 @@ type action_type =
     | VERIFY
 val string_of_action_type : action_type -> string
 val action_type_of_strng : string -> action_type
+val actions : (string * action_type) list
 
 type key_conf = {
     mutable in_key: string;
