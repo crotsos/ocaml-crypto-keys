@@ -38,11 +38,3 @@ Executable "generate_key"
   BuildDepends: crypto_keys, cmdliner
   CompiledObject: best
   Install: true
-
-Executable "cmds"
-  Path:       lib/
-  BuildTools: ocamlbuild
-  MainIs:     cmds.ml 
-  BuildDepends: crypto_keys, cmdliner
-  CompiledObject: best
-  Install: true

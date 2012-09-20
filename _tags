@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: e0e5bdda08f808fa68232c15ecf9ba7a)
+# DO NOT EDIT (digest: bd04c65ec80e0c1e4ac5a420efd3bcda)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -59,15 +59,6 @@
 <lib/generate_key.{native,byte}>: pkg_lwt
 <lib/generate_key.{native,byte}>: pkg_dns
 <lib/generate_key.{native,byte}>: pkg_dns.resolver
-# Executable cmds
-<lib/cmds.{native,byte}>: use_crypto_keys
-<lib/cmds.{native,byte}>: pkg_cmdliner
-<lib/cmds.{native,byte}>: pkg_cryptokit
-<lib/cmds.{native,byte}>: pkg_bitstring
-<lib/cmds.{native,byte}>: pkg_bitstring.syntax
-<lib/cmds.{native,byte}>: pkg_lwt
-<lib/cmds.{native,byte}>: pkg_dns
-<lib/cmds.{native,byte}>: pkg_dns.resolver
 <lib/*.ml{,i}>: use_crypto_keys
 <lib/*.ml{,i}>: pkg_cmdliner
 <lib/*.ml{,i}>: pkg_cryptokit
