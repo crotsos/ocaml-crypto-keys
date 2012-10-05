@@ -123,7 +123,8 @@ let dns_pub_of_rsa key =
 let get_dnssec_key ?server:(server="128.232.1.1") ?dns_port:(dns_port = 53) domain =
   try_lwt begin
     let open Dns.Packet in
-    lwt reply = Dns_resolver.resolve server dns_port Q_IN Q_DNSKEY
+    lwt t = Dns_resolver.create ~config:(`Static([(server,dns_port)],[""])) () in 
+    lwt reply = Dns_resolver.resolve t Q_IN Q_DNSKEY
         (Dns.Name.string_to_domain_name domain) 
     in
     match reply.answers with
