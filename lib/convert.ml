@@ -56,14 +56,22 @@ let _ =
     let doc = "Key Subject" in
     Arg.(value & opt string "" & info ["s";"subject"] ~docv:"SUBJECT" ~doc)
   in
+ let ns_ip =
+    let doc = "server ip" in
+    Arg.(value & opt string "23.23.179.30" & info ["S";"server"] ~docv:"SERVER" ~doc)
+  in
+ let ns_port =
+    let doc = "server port" in
+    Arg.(value & opt int 5354 & info ["P";"port"] ~docv:"PORT" ~doc)
+  in
   let duration =
     Arg.(value & opt int 100 & info ["d";"duration"] ~docv:"DURATION" ~doc:"Key Duration")
   in
-  let make_conf in_key in_type out_key out_type in_issuer in_ca_priv action cert_subj duration =
+  let make_conf in_key in_type out_key out_type in_issuer in_ca_priv action cert_subj ns_ip ns_port duration =
     Key.({ in_key; in_issuer; in_ca_priv; in_type; action; cert_subj;out_key; out_type;
-      duration; ns_ip="127.0.0.1";ns_port=5354}) in
+      duration; ns_ip;ns_port;}) in
   let cmd_t = Term.(pure make_conf $ in_key $ in_type $ out_key $ out_type $ issuer $ 
-    ca_priv $ action $ subj $ duration) in
+    ca_priv $ action $ subj $ ns_ip $ ns_port $ duration) in
   let info =
     let doc = "Convert between different key formats" in
     let man = [ `S "BUGS"; `P "Email bug reports to <cl-mirage@lists.cl.cam.ac.uk>."] in
