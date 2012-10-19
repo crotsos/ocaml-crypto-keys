@@ -30,7 +30,7 @@ let _ =
   in
   let in_key =
     let doc = "Ontput key file to convert" in
-    Arg.(value & pos 1 file "/dev/stdin" & info [] ~docv:"INPUT" ~doc)
+    Arg.(value & pos 1 string "/dev/stdin" & info [] ~docv:"INPUT" ~doc)
   in
   let in_type =
     let doc = "Input file type, which can be " ^ (enum_help Key.keys) in
@@ -61,7 +61,7 @@ let _ =
   in
   let make_conf in_key in_type out_key out_type in_issuer in_ca_priv action cert_subj duration =
     Key.({ in_key; in_issuer; in_ca_priv; in_type; action; cert_subj;out_key; out_type;
-      duration; ns_ip="8.8.8.8";ns_port=5354}) in
+      duration; ns_ip="127.0.0.1";ns_port=5354}) in
   let cmd_t = Term.(pure make_conf $ in_key $ in_type $ out_key $ out_type $ issuer $ 
     ca_priv $ action $ subj $ duration) in
   let info =
