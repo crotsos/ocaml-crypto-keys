@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: ec6fb1bf7ab0ad9f6d04b994c34c550f) *)
+(* DO NOT EDIT (digest: d76fbd8d6a90b86d3ee2470a6dfa9a7c) *)
 module OASISGettext = struct
 # 21 "/root/.opam/4.00.1+raspberrypi/build/oasis.0.3.0/src/oasis/OASISGettext.ml"
 
@@ -481,8 +481,6 @@ let package_default =
      lib_c = [("crypto_keys", "lib/", [])];
      flags =
        [
-          (["oasis_library_crypto_keys_ccopt"; "compile"],
-            [(OASISExpr.EBool true, S [A "-ccopt"; A "-O2"])]);
           (["oasis_library_crypto_keys_cclib"; "link"],
             [
                (OASISExpr.EBool true,
@@ -497,6 +495,6 @@ let package_default =
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 
-# 501 "myocamlbuild.ml"
+# 499 "myocamlbuild.ml"
 (* OASIS_STOP *)
 Ocamlbuild_plugin.dispatch dispatch_default;;

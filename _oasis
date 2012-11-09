@@ -11,23 +11,22 @@ Library crypto_keys
   BuildTools: ocamlbuild
   Modules:    Key,Rsa
   CSources:   binding_ssl_ext.c
-  CCOpt:      -O2
   CCLib:      -lssl -lcrypto
-  BuildDepends: cryptokit, lwt, dns, bitstring, bitstring.syntax, dns.lwt, cmdliner
+  BuildDepends: bitstring, bitstring.syntax, dns.lwt, cmdliner
 
 Executable "crypto-convert"
   Path:       lib/
   BuildTools: ocamlbuild
   MainIs:     convert.ml
   CompiledObject: best
-  BuildDepends: cryptokit,crypto_keys,bitstring, bitstring.syntax, cstruct, cmdliner
+  BuildDepends: crypto_keys
   Install: true
 
 Executable "dnssec_to_ssh"
   Path:       lib/
   BuildTools: ocamlbuild
   MainIs:     dnssec_to_ssh.ml 
-  BuildDepends: crypto_keys, cmdliner
+  BuildDepends: crypto_keys
   CompiledObject: best
   Install: false 
   
@@ -35,6 +34,6 @@ Executable "generate_key"
   Path:       lib/
   BuildTools: ocamlbuild
   MainIs:     generate_key.ml 
-  BuildDepends: crypto_keys, cmdliner
+  BuildDepends: crypto_keys
   CompiledObject: best
-  Install: true
+  Install: false
