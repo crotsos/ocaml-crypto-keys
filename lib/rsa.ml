@@ -110,7 +110,6 @@ let rsa_key_to_cryptokit_hex_rsa rsa_key =  {
   RSA.qinv = string_of_hex (rsa_get_qinv(rsa_key));
 }  
 
-
 module C = Cryptokit
 
 let rng () = C.Random.device_rng "/dev/random"
@@ -173,8 +172,9 @@ let unsign rsa_sig_pubkey s =
 let random_key () =
   C.Random.string (C.Random.secure_rng) 32
 
-  (* Read an RSA private key from a file.
-  If the file is password protected, a password will be asked in the console *)
+(* Read an RSA private key from a file.
+ * If the file is password protected, a password will 
+ * be asked in the console *)
 let read_rsa_privkey file = try
     let rsa = rsa_read_privkey file in
   rsa_key_to_cryptokit_hex_rsa rsa

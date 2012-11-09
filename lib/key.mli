@@ -38,6 +38,7 @@ val process : key_conf -> unit Lwt.t
 val string_of_process : key_conf -> string Lwt.t
 
 val create_rsa_key : string -> int -> Cryptokit.RSA.key 
+val load_rsa_priv_key : string -> Cryptokit.RSA.key
 
 val ssh_fingerprint_of_domain: ?server:string -> ?port:int -> string -> 
         string list option Lwt.t
