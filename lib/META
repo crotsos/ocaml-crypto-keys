@@ -1,9 +1,9 @@
 # OASIS_START
-# DO NOT EDIT (digest: 9ea347618fdf3e659e72ab9a058dd70c)
+# DO NOT EDIT (digest: 3e8599fa01f12710240164954a0c4b3f)
 version = "0.3.0"
 description =
 "A library to transform public key files between different formats"
-requires = "bitstring bitstring.syntax dns.lwt cmdliner"
+requires = "bitstring bitstring.syntax dns.lwt cmdliner cryptokit"
 archive(byte) = "crypto_keys.cma"
 archive(byte, plugin) = "crypto_keys.cma"
 archive(native) = "crypto_keys.cmxa"

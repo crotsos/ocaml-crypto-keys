@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 73188a6a1f3e49077340d7346c01e1fc)
+# DO NOT EDIT (digest: 52e4cbccf17878d90122039ffdba79a4)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -25,29 +25,34 @@
 "lib/binding_ssl_ext.c": pkg_bitstring.syntax
 "lib/binding_ssl_ext.c": pkg_dns.lwt
 "lib/binding_ssl_ext.c": pkg_cmdliner
+"lib/binding_ssl_ext.c": pkg_cryptokit
 # Executable crypto-convert
 <lib/convert.{native,byte}>: use_crypto_keys
 <lib/convert.{native,byte}>: pkg_bitstring
 <lib/convert.{native,byte}>: pkg_bitstring.syntax
 <lib/convert.{native,byte}>: pkg_dns.lwt
 <lib/convert.{native,byte}>: pkg_cmdliner
+<lib/convert.{native,byte}>: pkg_cryptokit
 # Executable dnssec_to_ssh
 <lib/dnssec_to_ssh.{native,byte}>: use_crypto_keys
 <lib/dnssec_to_ssh.{native,byte}>: pkg_bitstring
 <lib/dnssec_to_ssh.{native,byte}>: pkg_bitstring.syntax
 <lib/dnssec_to_ssh.{native,byte}>: pkg_dns.lwt
 <lib/dnssec_to_ssh.{native,byte}>: pkg_cmdliner
+<lib/dnssec_to_ssh.{native,byte}>: pkg_cryptokit
 # Executable generate_key
 <lib/generate_key.{native,byte}>: use_crypto_keys
 <lib/generate_key.{native,byte}>: pkg_bitstring
 <lib/generate_key.{native,byte}>: pkg_bitstring.syntax
 <lib/generate_key.{native,byte}>: pkg_dns.lwt
 <lib/generate_key.{native,byte}>: pkg_cmdliner
+<lib/generate_key.{native,byte}>: pkg_cryptokit
 <lib/*.ml{,i}>: use_crypto_keys
 <lib/*.ml{,i}>: pkg_bitstring
 <lib/*.ml{,i}>: pkg_bitstring.syntax
 <lib/*.ml{,i}>: pkg_dns.lwt
 <lib/*.ml{,i}>: pkg_cmdliner
+<lib/*.ml{,i}>: pkg_cryptokit
 # OASIS_STOP
 <lib/*>: syntax_camlp4o
 <lib/*>: bitstring.syntax
