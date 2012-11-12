@@ -45,4 +45,8 @@ val ssh_fingerprint_of_domain: ?server:string -> ?port:int -> string ->
 val ssh_pub_key_of_domain : ?server:string -> ?port:int ->string -> 
         string list option Lwt.t
 val dnskey_of_pem_pub_file : string -> string list option Lwt.t
+val dnskey_rdata_of_pem_pub_file : string -> int -> Dns.Packet.dnssec_alg -> 
+  Dns.Packet.rdata option Lwt.t
+val dnskey_rdata_of_pem_priv_file : string -> int -> Dns.Packet.dnssec_alg -> 
+  Dns.Packet.rdata option Lwt.t
 val dnskey_of_pem_priv_file : string -> string list option Lwt.t

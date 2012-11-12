@@ -125,6 +125,19 @@ let dns_pub_of_rsa key =
       (C.transform_string (C.Base64.encode_compact ()) 
          (Bitstring.string_of_bitstring key_rdata))
 
+let dnskey_rdata_of_rsa flag alg key =
+  let len = String.length key.C.RSA.e in 
+  let key_rdata = 
+    if (len <= 255) then 
+      BITSTRING{len:8; (key.C.RSA.e):len*8:string; 
+                        key.C.RSA.n:(String.length key.C.RSA.n)*8:string}
+    else 
+      BITSTRING{0:8; len:16; (key.C.RSA.e):len*8:string; 
+                              key.C.RSA.n:(String.length key.C.RSA.n)*8:string}
+  in
+    Dns.Packet.DNSKEY(flag, alg, 
+         (Bitstring.string_of_bitstring key_rdata))
+
 let get_dnssec_key ?server:(server="128.232.1.1") 
       ?dns_port:(dns_port = 53) domain =
   try_lwt begin
@@ -355,6 +368,21 @@ let dnskey_of_pem_pub_file file =
     | Some(key) -> 
         let ret = dns_pub_of_rsa key in 
           return (Some([ret]))
+    | None -> return (None)
+
+let dnskey_rdata_of_pem_pub_file file f a =
+  lwt tmp = load_key "" 0 file PEM_PUB in
+  match tmp with
+    | Some(key) -> 
+        return 
+          (Some(dnskey_rdata_of_rsa f a key))
+    | None -> return (None)
+let dnskey_rdata_of_pem_priv_file file f a =
+  lwt tmp = load_key "" 0 file PEM_PRIV in
+  match tmp with
+    | Some(key) -> 
+        return 
+          (Some(dnskey_rdata_of_rsa f a key))
     | None -> return (None)
 
 let dnskey_of_pem_priv_file file =
