@@ -151,7 +151,7 @@ let get_dnssec_key ?server:(server="128.232.1.1")
     |[] ->
       Printf.printf "Failed to get \n%!";
       return None
-    |ans::_ ->
+    |_::ans::_ ->
       let r = process_dnskey_rr ans.rdata in
       return r
   end
@@ -264,7 +264,7 @@ let ssh_fingerprint_of_rsa key =
   (!fingerprint)
 
 let load_key server port file typ = 
-(*   Printf.printf "loading key %s (%s)\n%!" file (string_of_key_type typ); *)
+  Printf.printf "loading key %s (%s)\n%!" file (string_of_key_type typ); 
   match typ with 
     | PEM_PRIV -> 
         return(Some(Rsa.read_rsa_privkey file))
@@ -323,7 +323,10 @@ let sign_key conf =
                return(Rsa.sign_rsa_pub_key key sign_key conf.in_issuer 
                       conf.cert_subj conf.duration conf.out_key)
         end
-    | (_, _) -> failwith "Failed to read input key"
+    | (Some _ , None) -> 
+        failwith "Failed to read signing key"
+    | (None, Some _) -> 
+        failwith "Failed to read input key"
 
 let string_of_sign_key conf =
   Printf.printf "signing key...\n";
