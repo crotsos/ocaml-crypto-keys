@@ -147,13 +147,17 @@ let get_dnssec_key ?server:(server="128.232.1.1")
     lwt reply = Dns_resolver.resolve t Q_IN Q_DNSKEY
         (Dns.Name.string_to_domain_name domain) 
     in
-    match reply.answers with
-    |[] ->
-      Printf.printf "Failed to get \n%!";
-      return None
-    |_::ans::_ ->
-      let r = process_dnskey_rr ans.rdata in
-      return r
+    let rec find_dnskey_rec = function
+      | [] ->
+          let _ = Printf.printf "Failed to get \n%!" in 
+            return None
+      | ans::_ when (Dns.Packet.rdata_to_rr_type ans.rdata = Dns.Packet.RR_DNSKEY ) ->
+          let r = process_dnskey_rr ans.rdata in
+            return r
+      | _::ret -> 
+          find_dnskey_rec ret
+    in
+      find_dnskey_rec reply.answers 
   end
   with e ->
     Printf.printf "failed to resolve name : %s\n%!" (Printexc.to_string e);
