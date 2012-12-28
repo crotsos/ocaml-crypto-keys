@@ -12,7 +12,7 @@ Library crypto_keys
   Modules:    Key,Rsa
   CSources:   binding_ssl_ext.c
   CCLib:      -lssl -lcrypto
-  BuildDepends: bitstring, bitstring.syntax, dns.lwt, cmdliner, cryptokit
+  BuildDepends: dns.lwt, cmdliner, cryptokit, cstruct
 
 Executable "crypto-convert"
   Path:       lib/

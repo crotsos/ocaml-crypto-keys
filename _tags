@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 52e4cbccf17878d90122039ffdba79a4)
+# DO NOT EDIT (digest: cc4c4fc8c10b33f42a29e59b5b1a04af)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -21,38 +21,33 @@
 "lib/libcrypto_keys_stubs.a": oasis_library_crypto_keys_cclib
 "lib/dllcrypto_keys_stubs.so": oasis_library_crypto_keys_cclib
 <lib/crypto_keys.{cma,cmxa}>: use_libcrypto_keys_stubs
-"lib/binding_ssl_ext.c": pkg_bitstring
-"lib/binding_ssl_ext.c": pkg_bitstring.syntax
 "lib/binding_ssl_ext.c": pkg_dns.lwt
 "lib/binding_ssl_ext.c": pkg_cmdliner
 "lib/binding_ssl_ext.c": pkg_cryptokit
+"lib/binding_ssl_ext.c": pkg_cstruct
 # Executable crypto-convert
 <lib/convert.{native,byte}>: use_crypto_keys
-<lib/convert.{native,byte}>: pkg_bitstring
-<lib/convert.{native,byte}>: pkg_bitstring.syntax
 <lib/convert.{native,byte}>: pkg_dns.lwt
 <lib/convert.{native,byte}>: pkg_cmdliner
 <lib/convert.{native,byte}>: pkg_cryptokit
+<lib/convert.{native,byte}>: pkg_cstruct
 # Executable dnssec_to_ssh
 <lib/dnssec_to_ssh.{native,byte}>: use_crypto_keys
-<lib/dnssec_to_ssh.{native,byte}>: pkg_bitstring
-<lib/dnssec_to_ssh.{native,byte}>: pkg_bitstring.syntax
 <lib/dnssec_to_ssh.{native,byte}>: pkg_dns.lwt
 <lib/dnssec_to_ssh.{native,byte}>: pkg_cmdliner
 <lib/dnssec_to_ssh.{native,byte}>: pkg_cryptokit
+<lib/dnssec_to_ssh.{native,byte}>: pkg_cstruct
 # Executable generate_key
 <lib/generate_key.{native,byte}>: use_crypto_keys
-<lib/generate_key.{native,byte}>: pkg_bitstring
-<lib/generate_key.{native,byte}>: pkg_bitstring.syntax
 <lib/generate_key.{native,byte}>: pkg_dns.lwt
 <lib/generate_key.{native,byte}>: pkg_cmdliner
 <lib/generate_key.{native,byte}>: pkg_cryptokit
+<lib/generate_key.{native,byte}>: pkg_cstruct
 <lib/*.ml{,i}>: use_crypto_keys
-<lib/*.ml{,i}>: pkg_bitstring
-<lib/*.ml{,i}>: pkg_bitstring.syntax
 <lib/*.ml{,i}>: pkg_dns.lwt
 <lib/*.ml{,i}>: pkg_cmdliner
 <lib/*.ml{,i}>: pkg_cryptokit
+<lib/*.ml{,i}>: pkg_cstruct
 # OASIS_STOP
 <lib/*>: syntax_camlp4o
 <lib/*>: bitstring.syntax

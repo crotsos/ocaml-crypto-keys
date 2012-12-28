@@ -89,7 +89,7 @@ type key_conf = {
 
 let process_dnskey_rr = function 
   | DNSKEY(_, _, bits) -> 
-      let buf = Lwt_bytes.of_string bits in 
+      let buf = Cstruct.of_bigarray (Lwt_bytes.of_string bits) in 
       let (exp, modu) = 
         match (Cstruct.get_uint8 buf 0) with
           | 0 -> 
@@ -111,8 +111,26 @@ let process_dnskey_rr = function
                       dq = "";qinv = "";}))
   | _ -> None
 
+let marshal_rsa_key key = 
+  let ret = Cstruct.create 4096 in
+  let len = 
+    if (String.length key.C.RSA.e > 255) then
+      let _ = Cstruct.set_uint8 ret 0 0 in
+      let _ = Cstruct.BE.set_uint16 ret 1 (String.length key.C.RSA.e) in
+        3
+    else 
+      let _ = Cstruct.set_uint8 ret 0 (String.length key.C.RSA.e) in 
+        1
+  in
+  let buf = Cstruct.shift ret len in 
+  let _ = Cstruct.blit_from_string key.C.RSA.e 0 buf 0 (String.length key.C.RSA.e) in
+  let buf = Cstruct.shift buf (String.length key.C.RSA.e) in 
+  let _ = Cstruct.blit_from_string key.C.RSA.n 0 buf 0 (String.length key.C.RSA.n) in 
+  let len = len + (String.length key.C.RSA.e) + (String.length key.C.RSA.n) in 
+    Cstruct.to_string (Cstruct.sub ret 0 len)
+
 let dns_pub_of_rsa key =
-  let len = String.length key.C.RSA.e in 
+(*  let len = String.length key.C.RSA.e in 
   let key_rdata = 
     if (len <= 255) then 
       BITSTRING{len:8; (key.C.RSA.e):len*8:string; 
@@ -120,13 +138,13 @@ let dns_pub_of_rsa key =
     else 
       BITSTRING{0:8; len:16; (key.C.RSA.e):len*8:string; 
                               key.C.RSA.n:(String.length key.C.RSA.n)*8:string}
-  in
+  in *)
     sprintf "DNSKEY 256 3 5 %s" 
       (C.transform_string (C.Base64.encode_compact ()) 
-         (Bitstring.string_of_bitstring key_rdata))
+         (marshal_rsa_key key))
 
 let dnskey_rdata_of_rsa flag alg key =
-  let len = String.length key.C.RSA.e in 
+(*  let len = String.length key.C.RSA.e in 
   let key_rdata = 
     if (len <= 255) then 
       BITSTRING{len:8; (key.C.RSA.e):len*8:string; 
@@ -134,9 +152,9 @@ let dnskey_rdata_of_rsa flag alg key =
     else 
       BITSTRING{0:8; len:16; (key.C.RSA.e):len*8:string; 
                               key.C.RSA.n:(String.length key.C.RSA.n)*8:string}
-  in
+  in *)
     Dns.Packet.DNSKEY(flag, alg, 
-         (Bitstring.string_of_bitstring key_rdata))
+         (marshal_rsa_key key))
 
 let get_dnssec_key ?server:(server="128.232.1.1") 
       ?dns_port:(dns_port = 53) domain =
@@ -204,15 +222,17 @@ let parse_dnssec_key file =
             qinv=(!qinv);})
 
 let load_ssh_pub_key file =
-  let n_val = ref "" in 
-  let e_val = ref "" in 
+(*  let n_val = ref "" in 
+  let e_val = ref "" in *)
   let input = open_in file in 
   let buf = input_line input in
     close_in input;
     let key = (Cryptokit.(transform_string (Base64.decode ()) 
-                            (List.nth (Re_str.split (Re_str.regexp " ") buf) 1))) in 
+                            (List.nth (Re_str.split (Re_str.regexp " ") buf) 1))) in
+    let buf = 
+      Cstruct.of_bigarray (Lwt_bytes.of_string key) in
 (*       Printf.printf "readine key %s \n%!" (Rsa.hex_of_string key); *)
-      let _ = 
+(*      let _ = 
         bitmatch (Bitstring.bitstring_of_string key) with 
           | { "\x00\x00\x00\x07\x73\x73\x68\x2D\x72\x73\x61":88:string;
         ebytes:32; e:((Int32.to_int ebytes)*8):string;
@@ -221,8 +241,14 @@ let load_ssh_pub_key file =
               n_val := n; e_val := e;
 (*               Printf.printf "Matched the string"; *)
           | { _ } -> Printf.printf "Cannot decode key \n%!";
-      in
-        C.RSA.({C.RSA.size = 0; C.RSA.n =(!n_val); C.RSA.e =(!e_val); C.RSA.d ="";
+      in *)
+      let buf = Cstruct.shift buf 11 in 
+      let e_len = Int32.to_int (Cstruct.BE.get_uint32 buf 0) in 
+      let buf = Cstruct.shift buf 4 in 
+      let e = Cstruct.to_string (Cstruct.sub buf 0 e_len) in 
+      let buf = Cstruct.shift buf e_len in 
+      let n = Cstruct.to_string buf in 
+        C.RSA.({C.RSA.size = 0; C.RSA.n =n; C.RSA.e =e; C.RSA.d ="";
                 C.RSA.p =""; C.RSA.q =""; C.RSA.dp =""; C.RSA.dq ="";
                 C.RSA.qinv ="";})
 
@@ -239,15 +265,29 @@ let bitstring_ssh_pub_of_rsa key =
       else
         key.C.RSA.n 
     in
-    BITSTRING {
+    let buf = Cstruct.create 4096 in 
+    let data = buf in 
+    let _ = Cstruct.blit_from_string  "\x00\x00\x00\x07\x73\x73\x68\x2D\x72\x73\x61"
+              0 buf 0 11 in 
+    let buf = Cstruct.shift buf 11 in 
+    let _ = Cstruct.BE.set_uint32 buf 0 (Int32.of_int (String.length e)) in 
+    let buf = Cstruct.shift buf 4 in 
+    let _ = Cstruct.blit_from_string e 0 buf 0 (String.length e) in 
+    let buf = Cstruct.shift buf (String.length e) in 
+    let _ = Cstruct.BE.set_uint32 buf 0 (Int32.of_int (String.length n)) in 
+    let buf = Cstruct.shift buf 4 in 
+    let _ = Cstruct.blit_from_string n 0 buf 0 (String.length n) in 
+    let len = 11 + 8 + (String.length e) + (String.length n) in
+      Cstruct.sub data 0 len 
+(*    BITSTRING {
       "\x00\x00\x00\x07\x73\x73\x68\x2D\x72\x73\x61":88:string;
       (Int32.of_int (String.length e)):32; e:((String.length e)*8):string;
-      (Int32.of_int (String.length n)):32; n:((String.length n)*8):string }
+      (Int32.of_int (String.length n)):32; n:((String.length n)*8):string } *)
     
 let ssh_pub_key_of_rsa key =
  let key_bin =  bitstring_ssh_pub_of_rsa key in
     let key_ssh = (C.transform_string (C.Base64.encode_compact()) 
-      (Bitstring.string_of_bitstring key_bin)) in 
+      (Cstruct.to_string key_bin)) in 
       let ext_len = 
         if ( ((String.length key_ssh) mod 3) == 0) then 
           ""
@@ -259,7 +299,7 @@ let ssh_pub_key_of_rsa key =
 let ssh_fingerprint_of_rsa key = 
  let key_bin =  bitstring_ssh_pub_of_rsa key in
  let hash = C.hash_string (Cryptokit.Hash.md5 ()) 
-            (Bitstring.string_of_bitstring key_bin) in
+            (Cstruct.to_string key_bin) in
  let fingerprint = ref "" in 
    String.iter (fun ch -> 
                fingerprint := (Printf.sprintf "%s:%0x" (!fingerprint) 
